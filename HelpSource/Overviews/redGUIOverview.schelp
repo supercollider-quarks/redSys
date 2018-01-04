@@ -1,6 +1,7 @@
 TITLE:: redGUIOverview
 SUMMARY:: overview of gui wrappers
 CATEGORIES:: Red
+RELATED:: Overviews/redSysOverview, Overviews/redMixOverview
 
 TABLE::
 ## link::Classes/Red2DSlider:: || Red2DSlider(parent, bounds)

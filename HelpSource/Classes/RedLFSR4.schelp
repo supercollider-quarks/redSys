@@ -28,9 +28,7 @@ s.boot;
 {var trig= Impulse.ar(4); RedLFSR4.ar(trig).poll(trig); DC.ar(0)}.play;
 //sounding example
 {var trig= Impulse.ar(MouseX.kr(1, 100, 1)); SinOsc.ar((RedLFSR4.ar(trig)+60).midicps, 0, 0.3)!2}.play;
-::
 
-CODE::
 //language side
 b= 2r1000;//seed;
 Array.fill(15, {b= (b>>1)|((b&1).bitXor(b&2>>1)<<3)});

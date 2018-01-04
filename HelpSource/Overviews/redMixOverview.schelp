@@ -1,6 +1,7 @@
 TITLE:: redMixOverview
 SUMMARY:: overview of redMix classes
 CATEGORIES:: Red
+RELATED:: Overviews/redSysOverview, Overviews/redGUIOverview
 
 TABLE::
 ## link::Classes/RedAbstractMix:: || abstract class

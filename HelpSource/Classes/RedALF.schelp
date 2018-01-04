@@ -28,14 +28,13 @@ CODE::
 a= RedALF.atolf("abcdefg");
 RedALF.lftoa(a);
 
+a= RedALF.atolf("convert this text into floats!");
+a.plot;
+RedALF.lftoa(a);  //convert back
 
-//--convert the text in this helpfile into floats
-a= RedALF.atolf(Document.current.string);
-a.plot
-
-s.boot
+s.boot;
 b= Buffer.loadCollection(s, a.normalize(-1, 1));
-c= b.play(true, 0.1)
-c.free
-b.free
+c= b.play(true, 0.1);
+c.free;
+b.free;
 ::

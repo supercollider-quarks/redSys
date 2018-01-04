@@ -11,8 +11,8 @@ CLASSMETHODS::
 
 METHOD:: ar, kr
 
-ARGUMENT:: trig
-Trigger that will calculate a new value.
+ARGUMENT:: freq
+Sets the rate of the trigger that will calculate a new value.
 
 ARGUMENT:: iseed
 Initial seed. Use code::8 (2r1000):: to get the common sequence:
@@ -29,9 +29,7 @@ s.boot;
 {var trig= Impulse.ar(4); RedLFSR4BitStream.ar(1).poll(trig); DC.ar(0)}.play;
 //sounding example
 {RedLFSR4BitStream.ar(K2A.ar(MouseX.kr(100, 1000, 1)))!2}.play;
-::
 
-CODE::
 //language side
 (
 b= 2r1000;

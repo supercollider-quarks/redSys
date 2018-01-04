@@ -39,20 +39,20 @@ CODE::
 s.boot;
 
 //basic usage
-a= {SinOsc.ar(RedAutoScale.kr(MouseX.kr, 200, 400).round(50))}.play
+a= {SinOsc.ar(RedAutoScale.kr(MouseX.kr, 200, 400).round(25), 0, 0.2)}.play
 a.free
 
 //mouse button reset range
-a= {SinOsc.ar(RedAutoScale.kr(MouseX.kr, 200, 400, reset:MouseButton.kr).round(50))}.play
+a= {SinOsc.ar(RedAutoScale.kr(MouseX.kr, 200, 400, reset:MouseButton.kr).round(25), 0, 0.2)}.play
 a.free
 
 //predefined minimum input range
-a= {SinOsc.ar(RedAutoScale.kr(MouseX.kr(-10, 10), 200, 400, -5, 5, MouseButton.kr).round(50))}.play
+a= {SinOsc.ar(RedAutoScale.kr(MouseX.kr(-10, 10), 200, 400, -5, 5, MouseButton.kr).round(25), 0, 0.2)}.play
 a.free
 
 //--
 a= RedAutoScale(-10, 10);
-a.autoScale(100.rand.postln)	//repeat.  eventually 0 will be -10 and 99 will be 10
+a.autoScale(100.rand.postln)	//run repeatedly.  eventually 0 will be -10 and 99 will be 10
 a.min
 a.max
 ::

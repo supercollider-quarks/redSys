@@ -45,7 +45,7 @@ SynthDef(\redseq, {|out= 0|
 	e= EnvGen.kr(Env.perc, Impulse.kr(dur));
 	z= SinOsc.ar(freq, 0, e);
 	Out.ar(out, Pan2.ar(z, 0, 0.4));
-}).send(s);
+}).add;
 )
 
 a= Synth(\redseq)

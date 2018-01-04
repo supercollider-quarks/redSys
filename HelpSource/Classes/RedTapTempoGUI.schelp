@@ -36,13 +36,16 @@ METHOD:: tempo
 Get or set tempo in bps.
 
 METHOD:: monitor
-A link::Classes/Boolean::.
+A link::Classes/Boolean::. see link::#-monitorBus:: below.
 
 METHOD:: monitorAmp
 A link::Classes/Float::.
 
 METHOD:: monitorBus
-Default monitor bus is 7.
+Which bus to play the click sound on.
+
+DISCUSSION::
+As the default monitor bus is 7 we need to code::s.options.numOutputBusChannels= 8;:: and then code::s.reboot:: and code::s.meter:: to see the signal.
 
 METHOD:: close
 Closes the window if open and stop internal task.
@@ -62,11 +65,11 @@ a.monitorAmp= 0.2;
 a.monitor= false;
 a.close;
 
-//--
+//embedd the gui into another window
 (
 w= Window("hgf", Rect(100, 200, 500, 500));
 w.front;
-v= CompositeView(w, Rect(10, 10, 400, 400)).background_(Color.blue).decorator= FlowLayout(Rect(0, 0, 300, 300));
+v= CompositeView(w, Rect(100, 100, 200, 200)).background_(Color.blue);
 c= TempoClock(1.4);
 a= RedTapTempoGUI(c, parent:v);
 )

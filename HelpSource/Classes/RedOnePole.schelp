@@ -63,7 +63,7 @@ b.collect{|x| a.onepole(x)}.plot;
 
 
 {RedOnePole.ar(LFPulse.ar(30, 0.6), 0.99)}.plot(0.1);
-{RedOnePole.kr(LFPulse.kr(30, 0.6), 0.5)}.plot(0.1);		//rougly the same
+{RedOnePole.kr(LFPulse.kr(30, 0.6), 0.5)}.plot(0.1);	//roughly the same
 
 
 //--audio examples

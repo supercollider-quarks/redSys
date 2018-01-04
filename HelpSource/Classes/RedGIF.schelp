@@ -66,53 +66,52 @@ a= RedGIF.read("/Library/Application Support/Apple/iChat Icons/Funk Animals/RedD
 a.dump;
 a.makeWindow;
 
-
 //--template for custom code to manipulate and display
 (
-	var scale= 10;
-	var a= RedGIF.read("/Library/Application Support/Apple/iChat Icons/Funk Animals/RedDog.gif");
-	var win= Window("gif", Rect(300, 300, a.width*scale, a.height*scale), false);
-	a.background= Color.blue;					//overwrite background colour
-	a.images[0].data= a.images[0].data.reverse;	//mess with the image pixel data
-	win.view.background= a.background;
-	win.drawFunc= {
-		Pen.smoothing= false;
-		a.images[0].data.do{|col, i|
-			if(a.controls[0].transparentFlag.not or:{a.controls[0].transparent!=col}, {
-				Pen.fillColor= col;
-				Pen.fillOval(Rect(i%a.width*scale, i.div(a.width)*scale, scale, scale));
-			});
-		};
+var scale= 10;
+var a= RedGIF.read("/Library/Application Support/Apple/iChat Icons/Funk Animals/RedDog.gif");
+var win= Window("gif", Rect(300, 300, a.width*scale, a.height*scale), false);
+a.background= Color.blue;					//overwrite background colour
+a.images[0].data= a.images[0].data.reverse;	//mess with the image pixel data
+win.view.background= a.background;
+win.drawFunc= {
+	Pen.smoothing= false;
+	a.images[0].data.do{|col, i|
+		if(a.controls[0].transparentFlag.not or:{a.controls[0].transparent!=col}, {
+			Pen.fillColor= col;
+			Pen.fillOval(Rect(i%a.width*scale, i.div(a.width)*scale, scale, scale));
+		});
 	};
-	win.front;
+};
+win.front;
 )
 
 //--download example animated gif to desktop
-"cd ~/Desktop; curl -o dog-03.gif http://www.gifanimations.com/GA/image/animations/animals/dogs/dog-03.gif".unixCmd;
+"cd ~/Desktop; curl -o dog.gif http://www.animatedimages.org/data/media/202/animated-dog-image-0022.gif".unixCmd;
 
 //--template for animation (load an animated gif)
 (
-	var scale= 2;
-	var a= RedGIF.read("~/Desktop/dog-03.gif");
-	var win= Window("gif", Rect(300, 300, a.width*scale, a.height*scale), false);
-	var index= 0, img;
-	win.drawFunc= {
-		Pen.smoothing= false;
-		img= a.images.wrapAt(index);
-		img.data.do{|col, i|
-			if(img.control.transparentFlag.not or:{img.control.transparent!=col}, {
-				Pen.fillColor= col;
-				Pen.fillRect(Rect(i%a.width*scale, i.div(a.width)*scale, scale, scale));
-			});
-		};
-	};
-	win.front;
-	Routine({
-		while({win.isClosed.not}, {
-			win.refresh;
-			(img.control.duration*0.01).max(0.01).wait;
-			index= index+1;
+var scale= 2;
+var a= RedGIF.read("~/Desktop/dog.gif");
+var win= Window("gif", Rect(300, 300, a.width*scale, a.height*scale), false);
+var index= 0, img;
+win.drawFunc= {
+	Pen.smoothing= false;
+	img= a.images.wrapAt(index);
+	img.data.do{|col, i|
+		if(img.control.transparentFlag.not or:{img.control.transparent!=col}, {
+			Pen.fillColor= col;
+			Pen.fillRect(Rect(i%a.width*scale, i.div(a.width)*scale, scale, scale));
 		});
-	}).play(AppClock);
+	};
+};
+win.front;
+Routine({
+	while({win.isClosed.not}, {
+		win.refresh;
+		(img.control.duration*0.01).max(0.01).wait;
+		index= index+1;
+	});
+}).play(AppClock);
 )
 ::

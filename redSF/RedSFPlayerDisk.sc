@@ -14,7 +14,7 @@ RedSFPlayerDisk : RedSFPlayer {
 				var env= EnvGen.kr(Env.asr(atk, 1, rel), gate, doneAction:2);
 				var src= VDiskIn.ar(i+1, buf, rate*BufRateScale.ir(buf), loop);
 				Out.ar(out, src*env*amp);
-			}).send(server);
+			}).add;
 		};
 	}
 	prPlay {|out, rate, fadeTime, loop|
@@ -30,22 +30,22 @@ RedSFPlayerDisk : RedSFPlayer {
 			cond.wait;
 			buffer.cueSoundFile(buffer.path, 0, {
 				synth= Synth("redSFPlayerDisk"++channels, [
-				\out, out,
-				\rate, rate.max(0),				//need to block negative rates
-				\atk, attackTime,
-				\rel, fadeTime,
-				\loop, loop,
-				\amp, amp,
-				\buf, buffer
-			]);
-			NodeWatcher.register(synth);
-			if(loop.not, {
-				SystemClock.sched(duration, {
-					if(this.isPlaying, {
-						this.stop(fadeTime);
+					\out, out,
+					\rate, rate.max(0),				//need to block negative rates
+					\atk, attackTime,
+					\rel, fadeTime,
+					\loop, loop,
+					\amp, amp,
+					\buf, buffer
+				]);
+				NodeWatcher.register(synth);
+				if(loop.not, {
+					SystemClock.sched(duration, {
+						if(this.isPlaying, {
+							this.stop(fadeTime);
+						});
+						nil;
 					});
-					nil;
-				});
 			});});
 		};
 	}

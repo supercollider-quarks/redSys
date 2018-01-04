@@ -10,7 +10,7 @@ METHOD:: listToLibrary
 Adds the tools to the link::Classes/Library::.
 
 METHOD:: listToMenuLibrary
-Adds submenus plus a cmd+r shortcut to the Library menu.
+Adds submenus plus a cmd+r shortcut to the Library menu. (old osx cocoa gui only)
 
 NOTE::
 Mac OSX only.
@@ -35,5 +35,4 @@ RedToolsMenu.makeWindow(500@500);
 
 RedToolsMenu.add(['system', 'my test tool'], {"this does nothing".warn})
 RedToolsMenu.makeWindow
-RedToolsMenu.listToMenuLibrary;	//call this after adding tools to update the menu as well
 ::

@@ -56,9 +56,7 @@ CODE::
 a= RedIntelHex.read("/var/folders/wf/43mk9crd027f10mkp_ksv1zh0000gn/T/build2447586900609308316.tmp/udkPwm.cpp.hex")
 a.data
 a.hexFormatString
-::
 
-CODE::
 //--how to read a file from desktop
 a= RedIntelHex.read("~/Desktop/a_dec.cpp.hex");
 a.data

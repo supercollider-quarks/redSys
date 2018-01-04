@@ -38,6 +38,9 @@ used to scale amplitude
 ARGUMENT:: dur
 used to change duration between notes
 
+METHOD:: stop
+stop all sounds started by link::#*speaker:: or link::#*speaker2::
+
 INSTANCEMETHODS::
 
 PRIVATE:: initRedTestSF
@@ -54,18 +57,19 @@ Free buffer and synth for soundfile.
 EXAMPLES::
 
 CODE::
-s.boot
-a= {RedTest.ar(MouseY.kr(1, 0), MouseX.kr(-1, 1))}.play	//x= amp, y= pan
+s.boot;
+a= RedTest.speaker([0, 1]);
+a.stop;
+
+a= RedTest.speaker2([0, 1, 2]);
+a.stop;
+
+a= {RedTest.ar(MouseY.kr(1, 0), MouseX.kr(-1, 1))}.play;	//x= pan, y= amp
 a.free;
-a= {RedTest.ar(SinOsc.kr(1), SinOsc.ar(0.75))}.play
+a= {RedTest.ar(SinOsc.kr(1), SinOsc.ar(0.75))}.play;
 a.free;
 
-a= RedTest.sf2(0, s.defaultGroup);		//out bus and group
-a.sfFree
-
-a= RedTest.speaker([0, 1])
-a.stop
-
-a= RedTest.speaker2([0, 1, 2])
-a.stop
+//play a stereo soundfile
+a= RedTest.sf2(0, s.defaultGroup);	//out bus and group
+a.sfFree;
 ::

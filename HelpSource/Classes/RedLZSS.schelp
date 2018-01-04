@@ -6,7 +6,7 @@ RELATED:: Classes/RedBase64, Classes/RedHuffman, Classes/RedLZ77, Classes/RedLZ7
 DESCRIPTION::
 See http://michael.dipperstein.com/lzss/ and http://en.wikipedia.org/wiki/Lempel-Ziv-Storer-Szymanski
 
-A dictionary look-up compressor that performs best with long repeating patterns e.g. [0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3].
+A dictionary look-up compressor that performs best with long repeating patterns e.g. code::[0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3]::.
 
 NOTE::
 Only works with 8bit link::Classes/Integer:: (0-255) values.
@@ -61,7 +61,7 @@ a==c
 a= "JOEYNJOEYNJOEYJOEYNJOEYNJOEYJOEYNJOEYNJOEYJOEYNJOEYNJOEY".ascii;
 b= RedLZSS.compress(a);
 c= RedLZSS.binaryStringToBytes(b);
-c.size/a.size;			//compressed to 27%
+c.size/a.size;	//compressed to 27%
 d= RedLZSS.bytesToBinaryString(c);
 e= RedLZSS.decompress(d);
 e.collect{|x| x.asAscii}.join;
@@ -77,9 +77,9 @@ a==c
 
 
 a= {|i| [0, 0, 0, 1].choose}.dup(5000);
-RedLZSS.window= 512;		//decrease window and length to speed up compression
+RedLZSS.window= 512;	//decrease window and length to speed up compression
 RedLZSS.length= 16;
-b= RedLZSS.compress(a);		//very slow to compress large arrays
+b= RedLZSS.compress(a);	//very slow to compress large arrays
 RedLZSS.binaryStringToBytes(b).size/a.size;	//compressed to around 22% (also 22% with default window and length values)
 c= RedLZSS.decompress(b);	//fast to decompress
 a==c

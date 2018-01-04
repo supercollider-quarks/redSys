@@ -50,9 +50,7 @@ a.encodeArray([114, 114, 5]) //use this method for longer arrays
 //if used as an audio signal it is often preferred to normalize the values -1 to 1.
 //here is a simple way to do that normalization...
 RedDifferentialManchesterCodeNegative(11).encode([1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 1])*2-1
-::
 
-CODE::
 //--sound examples
 
 //the example just sequence differential manchester encoded bytes.
@@ -81,17 +79,13 @@ Routine.run({
 	};
 });
 )
-::
 
-CODE::
 //this example renders the 0-255 counter data in advance, normalize it and load it into a buffer
 //stutter(8) means eight samples per data bit
 b= Buffer.sendCollection(s, RedDifferentialManchesterCodeNegative().encodeArray((0..255)).stutter(8)*2-1)
 b.play
 b.free
-::
 
-CODE::
 //it is also possible to skip this class and do differential manchester code directly in the synthdef...
 (
 SynthDef(\redDifferentialManchesterEncodeNegative, {|out= 0, amp= 1, rate= 1000|

@@ -23,7 +23,7 @@ EXAMPLES::
 CODE::
 s.boot;
 
-a= {SinOsc.ar(RedDirection.kr(MouseX.kr).poll*100+400, 0, 0.1)}.play
+a= {SinOsc.ar(RedDirection.kr(MouseX.kr).poll*100+400, 0, 0.2)}.play
 a.free
 
 //--

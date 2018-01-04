@@ -63,7 +63,7 @@ b.collect{|x| a.slide(x)}.plot;
 
 
 {RedSlide.ar(LFPulse.ar(30, 0.6), 100)}.plot(0.1);
-{RedSlide.kr(LFPulse.kr(30, 0.6), 2)}.plot(0.1);		//rougly the same
+{RedSlide.kr(LFPulse.kr(30, 0.6), 2)}.plot(0.1);	//roughly  the same
 
 
 //--audio examples

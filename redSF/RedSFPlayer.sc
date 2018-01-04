@@ -6,7 +6,7 @@
 
 RedSFPlayer {
 	var	<>server, <buffer, <synth, <duration, <channels,
-		amp= 1, sendDefs= true;
+	amp= 1, sendDefs= true;
 	*new {|server|
 		^super.new.server_(server ? Server.default);
 	}
@@ -29,7 +29,7 @@ RedSFPlayer {
 		}, {
 			(this.class.name++": file"+path+"not found").warn;
 		});
-		
+
 	}
 	loop {|out= 0, rate= 1, fadeTime= 0|
 		this.prPlay(out, rate, fadeTime, true);
@@ -55,9 +55,9 @@ RedSFPlayer {
 		^synth.isPlaying;
 	}
 	makeWindow {
-		
+
 	}
-	
+
 	//--private
 	prRead {|path|
 		buffer= Buffer.read(server, path);
@@ -68,7 +68,7 @@ RedSFPlayer {
 				var env= EnvGen.kr(Env.asr(atk, 1, rel), gate, doneAction:2);
 				var src= PlayBuf.ar(i+1, buf, rate*BufRateScale.ir(buf), 1, 0, loop);
 				Out.ar(out, src*env*amp);
-			}).send(server);
+			}).add;
 		};
 	}
 	prPlay {|out, rate, fadeTime, loop|

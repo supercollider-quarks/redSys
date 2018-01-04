@@ -77,14 +77,15 @@ EXAMPLES::
 
 CODE::
 s.boot;
-a= RedSFPlayerDisk.new
-a.read(Platform.resourceDir +/+ "sounds/a11wlk01-44_1.aiff")
-a.play				//default is play out on bus 0 with rate 1 and 0 fadeTime
-a.stop
 
-a.loop(0, 3, 4)		//start looping with long fadeTime and high rate
-a.loop(0, 1.2)		//another loop (crossfade will not work and fadeTime is ignored)
-a.stop(4)				//fadeout
+a= RedSFPlayerDisk.new;
+a.read(Platform.resourceDir +/+ "sounds/a11wlk01-44_1.aiff");
+a.play;	//default is play out on bus 0 with rate 1 and 0 fadeTime
+a.stop;
 
-a.free
+a.loop(0, 3, 4);	//start looping with long fadeTime and high rate
+a.loop(0, 1.2);	//another loop (crossfade will not work and fadeTime is ignored)
+a.stop(4);	//fadeout
+
+a.free;
 ::
