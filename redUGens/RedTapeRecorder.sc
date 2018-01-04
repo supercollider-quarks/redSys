@@ -3,11 +3,11 @@
 //gate= 1 record, gate= 0 looped playback
 
 RedTapeRecorder {
-	
-	*ar {|buffer, in, gate, interpol= 1|	//1=no, 2=linear, 4=cubic
-		var recPhasor, playPhasor, playTrigger;
-		playTrigger= 1-gate;
-		recPhasor= Gate.ar(
+
+	*ar {|buffer, in, gate, interpol= 1, muteWhileRecording= 0, lag= 0|	//1=no, 2=linear, 4=cubic
+		var playTrigger= 1-gate;
+		var mute= Latch.ar(DC.ar(1), gate)*(1-muteWhileRecording|playTrigger).lag(lag);
+		var recPhasor= Gate.ar(
 			EnvGen.ar(
 				Env(#[0, 1, 0], #[1, 0], 'lin', 1),
 				gate,
@@ -17,17 +17,15 @@ RedTapeRecorder {
 			),
 			gate
 		);
-		playPhasor= Phasor.ar(playTrigger, 1, 0, Latch.ar(recPhasor, playTrigger));
-		^Select.ar(playTrigger, [
-			BufWr.ar(in, buffer.bufnum, recPhasor, 0),
-			BufRd.ar(buffer.numChannels, buffer.bufnum, playPhasor, 1, interpol)
-		])
+		var playPhasor= Phasor.ar(playTrigger, 1, 0, Latch.ar(recPhasor, playTrigger));
+		BufWr.ar(in, buffer.bufnum, recPhasor, 0);
+		^BufRd.ar(buffer.numChannels, buffer.bufnum, playPhasor, 1, interpol)*mute;
 	}
-	
-	*kr {|buffer, in, gate, interpol= 1|	//1=no, 2=linear, 4=cubic
-		var recPhasor, playPhasor, playTrigger;
-		playTrigger= 1-gate;
-		recPhasor= Gate.kr(
+
+	*kr {|buffer, in, gate, interpol= 1, muteWhileRecording= 0, lag= 0|	//1=no, 2=linear, 4=cubic
+		var playTrigger= 1-gate;
+		var mute= Latch.kr(DC.kr(1), gate)*(1-muteWhileRecording|playTrigger).lag(lag);
+		var recPhasor= Gate.kr(
 			EnvGen.kr(
 				Env(#[0, 1, 0], #[1, 0], 'lin', 1),
 				gate,
@@ -37,10 +35,8 @@ RedTapeRecorder {
 			),
 			gate
 		);
-		playPhasor= Phasor.kr(playTrigger, 1, 0, Latch.kr(recPhasor, playTrigger));
-		^Select.kr(playTrigger, [
-			BufWr.kr(in, buffer.bufnum, recPhasor, 0),
-			BufRd.kr(buffer.numChannels, buffer.bufnum, playPhasor, 1, interpol)
-		])
+		var playPhasor= Phasor.kr(playTrigger, 1, 0, Latch.kr(recPhasor, playTrigger));
+		BufWr.kr(in, buffer.bufnum, recPhasor, 0);
+		^BufRd.kr(buffer.numChannels, buffer.bufnum, playPhasor, 1, interpol)*mute;
 	}
 }
