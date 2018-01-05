@@ -26,7 +26,10 @@ Slider to go from now to later.
 EXAMPLES::
 
 CODE::
-a= RedMatrixMixerGUI(RedMatrixMixer());
+s.options.numOutputBusChannels= 8;
+s.reboot;
+s.meter;
+g= RedMatrixMixerGUI(a= RedMatrixMixer());
 (
 SynthDef(\redMatrixMixerTest, {|out= 0, freq= 400, gate= 1, amp= 0.1|
 	var e= EnvGen.kr(Env.asr(0.01, 1, 0.01), gate, doneAction:2);
@@ -39,12 +42,15 @@ b= Pbind(\instrument, \redMatrixMixerTest, \degree, Pseq([0, 1, 5, 4], inf), \du
 (
 Routine({
 	10.do{|x|
-		a.redMatrixMixer.cvs.do{|x| if(x.value.isArray, {x.value= x.value.rotate})};
+		a.o0= a.o0.rotate;
+		a.o1= a.o1.rotate;
+		a.o2= a.o2.rotate;
+		a.o3= a.o3.rotate;
 		0.2.wait;
 	};
 }).play(AppClock);
 )
 
-a.close
+g.close
 b.stop
 ::

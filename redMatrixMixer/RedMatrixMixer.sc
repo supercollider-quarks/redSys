@@ -4,9 +4,9 @@
 //RedMatrixMixerGUI, RedEffectsRack, RedMixer
 
 RedMatrixMixer {
-	var <group, <cvs, <args,
-		<isReady= false, groupPassedIn,
-		<nIn, <nOut, <synth, <os, <defString;
+	var <group,
+	<isReady= false, groupPassedIn,
+	<nIn, <nOut, <synth, <os, <defString;
 	*new {|nIn= 8, nOut= 8, in= 0, out= 0, group, lag= 0.05|
 		^super.new.initRedMatrixMixer(nIn, nOut, in, out, group, lag);
 	}
@@ -14,7 +14,7 @@ RedMatrixMixer {
 		var server;
 		nIn= argNIn;
 		nOut= argNOut;
-		
+
 		if(argGroup.notNil, {
 			server= argGroup.server;
 			groupPassedIn= true;
@@ -22,21 +22,22 @@ RedMatrixMixer {
 			server= Server.default;
 			groupPassedIn= false;
 		});
-		
-		//--create cvs and argument array
-		cvs= (
-			\in: CV.new.spec_(\audiobus.asSpec),
-			\out: CV.new.spec_(\audiobus.asSpec),
-			\lag: CV.new.spec_(ControlSpec(0, 99, \lin, 0, argLag))
+
+		os= (
+			in: Ref(argIn),
+			out: Ref(argOut),
+			lag: Ref(argLag)
 		);
-		cvs.in.value= argIn;
-		cvs.out.value= argOut;
-		args= [
-			\in, cvs.in,
-			\out, cvs.out,
-			\lag, cvs.lag
-		];
-		
+		SimpleController(os[\in]).put(\value, {|ref|
+			synth.set(\in, ref.value);
+		});
+		SimpleController(os[\out]).put(\value, {|ref|
+			synth.set(\out, ref.value);
+		});
+		SimpleController(os[\lag]).put(\value, {|ref|
+			synth.set(\lag, ref.value);
+		});
+
 		forkIfNeeded{
 			if(groupPassedIn.not, {
 				server.bootSync;
@@ -46,25 +47,30 @@ RedMatrixMixer {
 			}, {
 				group= argGroup;
 			});
-			
+
 			//--send definitions
 			this.def.add;
 			server.sync;
-			
+
 			//--create synth
-			synth= Synth.controls(\redMatrixMixer, args, group, \addToTail);
-			server.sync;
-			
-			//--create more cvs and map to synth
-			os= List.new;
+			synth= Synth(\redMatrixMixer, os.asKeyValuePairs, group, \addToTail);
 			nOut.do{|i|
+				var arr;
 				var name= ("o"++i).asSymbol;
-				var cv, arr= 0.dup(nIn);
+				var setName= ("o"++i++"_").asSymbol;
+				this.addUniqueMethod(setName, {|mixer, arr|
+					os[name].value_(arr).changed(\value);
+				});
+				this.addUniqueMethod(name, {|mixer|
+					os[name].value;
+				});
+				arr= 0.dup(nIn);
 				if(i<nIn, {arr= arr.put(i, 1)});
-				cv= CV.new.sp(arr, 0, 1, 0, \lin);
-				cvs.put(name, cv);
-				os.add(cv);
-				synth.setControls([name, cv]);
+				os[name]= Ref(arr);
+				SimpleController(os[name]).put(\value, {|ref|
+					synth.set(name, ref.value);
+					ref.changed;
+				});
 			};
 			server.sync;
 			isReady= true;
@@ -83,8 +89,17 @@ RedMatrixMixer {
 		defString= defString++"\n});";
 		^defString.interpret;
 	}
-	defaults {
-		cvs.do{|cv| cv.value= cv.spec.default};
+	in {^os[\in].value}
+	in_ {|val|
+		os[\in].value_(val).changed(\value);
+	}
+	out {^os[\out].value}
+	out_ {|val|
+		os[\out].value_(val).changed(\value);
+	}
+	lag {^os[\lag].value}
+	lag_ {|val|
+		os[\lag].value_(val).changed(\value);
 	}
 	free {
 		synth.free;

@@ -4,8 +4,10 @@ CATEGORIES:: Red>redMatrixMixer
 RELATED:: Classes/RedMatrixMixerGUI, Classes/RedEffectsRack, Classes/RedMixer
 
 DESCRIPTION::
+matrix mixer
+
 NOTE::
-Requires the link::Classes/Conductor:: quark.
+this class dynamically adds N unique methods for each output channel.  code::o0:: means output channel 0, code::o1:: output channel 1 etc. depending on how many outputs you have specified when creating the mixer.
 ::
 
 CLASSMETHODS::
@@ -34,11 +36,17 @@ INSTANCEMETHODS::
 
 PRIVATE:: initRedMatrixMixer
 
+METHOD:: in
+input bus offset
+
+METHOD:: out
+output bus offset
+
+METHOD:: lag
+mix lag time in seconds (linear)
+
 METHOD:: def
 Generate a link::Classes/SynthDef::.
-
-METHOD:: defaults
-Revert all link::Classes/CV::s to their defaults.
 
 METHOD:: free
 Free all synths.
@@ -52,21 +60,11 @@ A link::Classes/Point::.
 METHOD:: group
 The link::Classes/Group:: in use.
 
-METHOD:: cvs
-Dictionary of link::Classes/CV::s:
-
-TABLE::
-## in || input bus offset
-## out || output bus offset
-## lag || mix lag time in seconds (linear)
-## o0, o1... oN || as many as out busses. An array of amplitudes (as many as in busses)
-::
-
 METHOD:: synth
 The mixer synth.
 
 METHOD:: os
-List of all amplitude control cv objects. code::.cvs.o0, .cvs.o1, .cvs.02…:: etc.
+List of all link::Classes/Ref:: objects. (used to be CV objects)
 
 METHOD:: defString
 Not useful - just for show-off.
@@ -74,7 +72,11 @@ Not useful - just for show-off.
 EXAMPLES::
 
 CODE::
-a= RedMatrixMixer(4, 2, 0, 0);	//4 channels in, 2 channels out
+s.options.numOutputBusChannels= 8;
+s.reboot;
+s.meter;
+
+a= RedMatrixMixer(4, 4, 0, 0);	//4 channels in, 4 channels out
 (
 SynthDef(\redMatrixMixerTest, {|out= 0, freq= 400, gate= 1, amp= 0.5|
 	var e= EnvGen.kr(Env.asr(0.01, 1, 0.01), gate, doneAction:2);
@@ -92,29 +94,30 @@ b= Pbind(
 ).play;
 )
 
-a.gui;
-a.cvs.o0.value= [1, 0, 0.3, 0];		//in0 to out0 with full amp, in2 to out0 with 0.3 amp
-a.cvs.o1.value= [0, 1, 0, 0.2];		//in1 to out1 with full amp, in3 to out1 with 0.2 amp
-a.cvs.in.value= 1;			//change to listen to input busses to 1-4
+a.gui;	//optional
 
-a.cvs.out.value= 1;			//left channel still outputs because the pbinds plays there
-					//and no ReplaceOut is blocking it
-a.cvs.out.value= 0;
-a.cvs.in.value= 0;
+a.o0= [1, 0, 0.3, 0];	//in0 to out0 with full amp, in2 to out0 with 0.3 amp
+a.o1= [0, 1, 0, 0.2];	//in1 to out1 with full amp, in3 to out1 with 0.2 amp
+a.in= 1;	//change to listen to input busses to 1-4
 
-a.cvs.lag.value= 3;
-a.cvs.o0.value= [0, 1, 1, 0.3];		//change mix with a 3 second lag
-a.cvs.o1.value= [1, 0, 0, 0.2];
-a.os;
+a.out= 1;	//left channel still outputs because the pbinds plays there
+	//and no ReplaceOut is blocking it
+a.out= 0;
+a.in= 0;
 
-a.defString
+a.o1= [0, 0, 0, 0];
+a.lag= 2;
+a.o0= [0, 1, 1, 0.3];	//change mix with a 2 second lag
+a.o0= [1, 0, 0, 0.2];
+a.o1= [0, 0.5, 0, 0];
+
+a.os	//current settings
+a.defString	//current synth def as a string
 a.def
 
-a.defaults
 a.free;
 b.stop;
 
-//--
 a= RedMatrixMixer(24, 22, 0, 0);	//14 channels in, 12 channels out
 a.defString
 a.free
