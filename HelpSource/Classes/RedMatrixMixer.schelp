@@ -64,7 +64,7 @@ METHOD:: synth
 The mixer synth.
 
 METHOD:: cvs
-List of all link::Classes/Ref:: objects. (used to be CV objects)
+Dictionary with all link::Classes/Ref:: objects. (used to be CV objects)
 
 METHOD:: defString
 Not useful - just for show-off.

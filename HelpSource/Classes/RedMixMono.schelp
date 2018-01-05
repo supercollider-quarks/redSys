@@ -4,10 +4,7 @@ CATEGORIES:: Red>redMix
 RELATED:: Overviews/redMixOverview, Classes/RedMixStereo, Classes/RedMixStereoMono, Classes/RedMatrixMixer, Classes/RedMixer
 
 DESCRIPTION::
-
-NOTE::
-Requires link::Classes/Conductor:: quark.
-::
+simple mixer that take two mono sources, combines them and output to one stereo
 
 CLASSMETHODS::
 
@@ -34,16 +31,18 @@ Returns the link::Classes/SynthDef::.
 EXAMPLES::
 
 CODE::
-a= RedMixMono(2, 4, 0);
-b= Pbind(\degree, Pseq([0, 1, 5, 4, 3], inf), \dur, 0.25, \pan, -1, \out, 2).play;
-c= Pbind(\degree, Pseq([10, 11, 16, 15], inf), \dur, 0.25, \pan, -1, \out, 4).play;
+a= RedMixMono(20, 40, 0);	//mono inputs on 20 and 40, stereo output on 0
+b= Pbind(\degree, Pseq([0, 1, 5, 4, 3], inf), \dur, 0.25, \pan, -1, \out, 20).play;
+c= Pbind(\degree, Pseq([10, 11, 16, 15], inf), \dur, 0.25, \pan, -1, \out, 40).play;
 
-a.cvs.mix.value= -0.9;
-a.cvs.mix.value= 0.9;
-a.cvs.lag.value= 2;
-a.cvs.mix.value= 0;
-a.cvs.amp.value= 0.2;
-a.gui
+a.mix= -0.9;
+a.mix= 0.9;
+a.lag= 2;
+a.mix= 0;
+a.amp= 0.2;
+
+g= a.gui;	//optional
+g.close;
 
 b.stop;
 c.stop;

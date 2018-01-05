@@ -6,13 +6,13 @@ install it from within supercollider with the command `Quarks.install("redSys")`
 
 red system including mixers, effects, instruments, presets, tools, gui
 
-dependencies: TabbedView (should be automatically installed)
+dependencies: TabbedView quark (should be automatically installed)
 
 see redSysOverview in help
 
 ## changelog:
 
-* 180104 - new readme. cleanup helpfiles. fixed RedTapeRecorder, minor bugfix to RedTest
+* 180105 - new readme. dropped Conductor quark dependency. cleanup helpfiles. fixed RedTapeRecorder. minor bugfix to RedTest. major rewrite of redMatrixMixer and redMix.
 * 151124 - RedTapTempoGUI - alpha
 * 131228 - added default values for RedTime-new and some more examples
 * 130927 - minor speed up by replacing & with bitAnd, << with leftShift and >> with rightShift

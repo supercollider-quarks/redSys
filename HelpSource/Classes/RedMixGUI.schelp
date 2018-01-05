@@ -4,9 +4,11 @@ CATEGORIES:: Red>redMix
 RELATED:: Overviews/redMixOverview, Classes/RedMixMono, Classes/RedMixStereo, Classes/RedMixStereoMono, Classes/RedMatrixMixerGUI, Classes/RedMixerGUI
 
 DESCRIPTION::
+gui for redMix objects.
 
-NOTE::
-Requires link::Classes/Conductor:: quark.
+The GUI takes the following modifier keys…
+TABLE::
+## ctrl || releasing the 2d slider will reset it to 0
 ::
 
 CLASSMETHODS::
@@ -34,38 +36,44 @@ EXAMPLES::
 CODE::
 (
 s.waitForBoot{
-	a= RedMixStereo(10, 14, 0);
-	Pbind(\degree, 0, \out, 10).play;
-	Pbind(\degree, 4, \out, 14).play;
-	c= RedMixGUI(a);
-}
+	a= RedMixStereo(20, 40, 0);
+	b= Pbind(\degree, 0, \out, 20).play;
+	c= Pbind(\degree, 4, \out, 40).play;
+	g= RedMixGUI(a);
+};
 )
 
-c.parent;
-c.redMix==a;
-c.close;
+g.parent;
+g.redMix==a;
+g.redMix.mix= -0.9;
+g.close;
+a.free;
+b.stop;
+c.stop;
 
 (
-w= Window("lkj", Rect(100, 200, 500, 500));
+var w= Window("lkj", Rect(100, 200, 500, 500));
 w.front;
-w.view.decorator= FlowLayout(w.view.bounds, 10@10, 10@10);
-a= RedMixStereo(10, 14, 0);
-Pbind(\degree, 0, \out, 10).play;
-Pbind(\degree, 4, \out, 14).play;
+w.view.decorator= FlowLayout(w.view.bounds, Point(10, 10), Point(10, 10));
+a= RedMixStereo(20, 40, 0);
+b= Pbind(\degree, 0, \out, 20).play;
+c= Pbind(\degree, 4, \out, 40).play;
 a.gui(w);
 w.view.decorator.nextLine;
 a.gui(w);
+w.onClose= {a.free; b.stop; c.stop};
 )
 
 (
 w= Window("hgf", Rect(100, 200, 500, 500));
 w.front;
 v= CompositeView(w, Rect(10, 10, 400, 400)).background_(Color.blue).decorator= FlowLayout(Rect(0, 0, 300, 300));
-a= RedMixStereo(10, 14, 0);
-Pbind(\degree, 0, \out, 10).play;
-Pbind(\degree, 4, \out, 14).play;
+a= RedMixStereo(20, 40, 0);
+b= Pbind(\degree, 0, \out, 20).play;
+c= Pbind(\degree, 4, \out, 40).play;
 a.gui(v);
 v.decorator.nextLine;
 a.gui(v);
+w.onClose= {a.free; b.stop; c.stop};
 )
 ::
