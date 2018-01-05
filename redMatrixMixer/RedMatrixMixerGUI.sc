@@ -58,7 +58,7 @@ RedMatrixMixerGUI {
 				redMatrixMixer.in= val;
 				inNumbers.do{|x, i| x.string= "i"++(i+val)};
 			});
-			inBoxController= SimpleController(redMatrixMixer.os[\in]).put(\value, {|ref|
+			inBoxController= SimpleController(redMatrixMixer.cvs[\in]).put(\value, {|ref|
 				inBox.value= ref.value;
 				inNumbers.do{|x, i| x.string= "i"++(i+ref.value)};
 			});
@@ -74,7 +74,7 @@ RedMatrixMixerGUI {
 				redMatrixMixer.out= val;
 				outNumbers.do{|x, i| x.string= "o"++(i+val)};
 			});
-			outBoxController= SimpleController(redMatrixMixer.os[\out]).put(\value, {|ref|
+			outBoxController= SimpleController(redMatrixMixer.cvs[\out]).put(\value, {|ref|
 				outBox.value= ref.value;
 				outNumbers.do{|x, i| x.string= "o"++(i+ref.value)};
 			});
@@ -88,7 +88,7 @@ RedMatrixMixerGUI {
 			.action_({|v|
 				redMatrixMixer.lag= v.value.max(0);
 			});
-			lagBoxController= SimpleController(redMatrixMixer.os[\lag]).put(\value, {|ref|
+			lagBoxController= SimpleController(redMatrixMixer.cvs[\lag]).put(\value, {|ref|
 				lagBox.value= ref.value;
 			});
 			lagBox.onClose_({lagBoxController.remove});
@@ -140,9 +140,9 @@ RedMatrixMixerGUI {
 					{var tmp= gui.collect{|x| x.value}; gui.do{|x, i| x.value= tmp.wrapAt(i-1)}},
 					{mainGUI.do{|x, i| x.value= mirrorGUI[i].value}},
 					{mirrorGUI.do{|x, i| x.value= mainGUI[i].value}},
-					{Dialog.savePanel{|x| redMatrixMixer.os.writeArchive(x)}},
+					{Dialog.savePanel{|x| redMatrixMixer.cvs.writeArchive(x)}},
 					{Dialog.openPanel{|x| Object.readArchive(x).keysValuesDo{|k, v|
-						redMatrixMixer.os[k].value_(v.value).changed(\value);
+						redMatrixMixer.cvs[k].value_(v.value).changed(\value);
 					}}}
 				][index].value;
 			};
@@ -229,12 +229,12 @@ RedMatrixMixerGUI {
 			];
 			tab.views[0].flow{|v|
 				mainGUI= {|i|
-					RedGUICVMultiSliderView(v, nil, redMatrixMixer.os[("o"++i).asSymbol]);
+					RedGUICVMultiSliderView(v, nil, redMatrixMixer.cvs[("o"++i).asSymbol]);
 				}.dup(nOut);
 			};
 			tab.views[1].flow{|v|
 				mirrorGUI= {|i|
-					RedGUICVMultiSliderViewMirror(v, nil, redMatrixMixer.os[("o"++i).asSymbol]);
+					RedGUICVMultiSliderViewMirror(v, nil, redMatrixMixer.cvs[("o"++i).asSymbol]);
 				}.dup(nOut);
 			};
 

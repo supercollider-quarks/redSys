@@ -63,7 +63,7 @@ The link::Classes/Group:: in use.
 METHOD:: synth
 The mixer synth.
 
-METHOD:: os
+METHOD:: cvs
 List of all link::Classes/Ref:: objects. (used to be CV objects)
 
 METHOD:: defString
@@ -111,7 +111,7 @@ a.o0= [0, 1, 1, 0.3];	//change mix with a 2 second lag
 a.o0= [1, 0, 0, 0.2];
 a.o1= [0, 0.5, 0, 0];
 
-a.os	//current settings
+a.cvs	//current settings
 a.defString	//current synth def as a string
 a.def
 

@@ -6,7 +6,7 @@
 RedMatrixMixer {
 	var <group,
 	<isReady= false, groupPassedIn,
-	<nIn, <nOut, <synth, <os, <defString;
+	<nIn, <nOut, <synth, <cvs, <defString;
 	*new {|nIn= 8, nOut= 8, in= 0, out= 0, group, lag= 0.05|
 		^super.new.initRedMatrixMixer(nIn, nOut, in, out, group, lag);
 	}
@@ -23,18 +23,18 @@ RedMatrixMixer {
 			groupPassedIn= false;
 		});
 
-		os= (
+		cvs= (
 			in: Ref(argIn),
 			out: Ref(argOut),
 			lag: Ref(argLag)
 		);
-		SimpleController(os[\in]).put(\value, {|ref|
+		SimpleController(cvs[\in]).put(\value, {|ref|
 			synth.set(\in, ref.value);
 		});
-		SimpleController(os[\out]).put(\value, {|ref|
+		SimpleController(cvs[\out]).put(\value, {|ref|
 			synth.set(\out, ref.value);
 		});
-		SimpleController(os[\lag]).put(\value, {|ref|
+		SimpleController(cvs[\lag]).put(\value, {|ref|
 			synth.set(\lag, ref.value);
 		});
 
@@ -53,21 +53,21 @@ RedMatrixMixer {
 			server.sync;
 
 			//--create synth
-			synth= Synth(\redMatrixMixer, os.asKeyValuePairs, group, \addToTail);
+			synth= Synth(\redMatrixMixer, cvs.asKeyValuePairs, group, \addToTail);
 			nOut.do{|i|
 				var arr;
 				var name= ("o"++i).asSymbol;
 				var setName= ("o"++i++"_").asSymbol;
 				this.addUniqueMethod(setName, {|mixer, arr|
-					os[name].value_(arr).changed(\value);
+					cvs[name].value_(arr).changed(\value);
 				});
 				this.addUniqueMethod(name, {|mixer|
-					os[name].value;
+					cvs[name].value;
 				});
 				arr= 0.dup(nIn);
 				if(i<nIn, {arr= arr.put(i, 1)});
-				os[name]= Ref(arr);
-				SimpleController(os[name]).put(\value, {|ref|
+				cvs[name]= Ref(arr);
+				SimpleController(cvs[name]).put(\value, {|ref|
 					synth.set(name, ref.value);
 					ref.changed;
 				});
@@ -89,17 +89,17 @@ RedMatrixMixer {
 		defString= defString++"\n});";
 		^defString.interpret;
 	}
-	in {^os[\in].value}
+	in {^cvs[\in].value}
 	in_ {|val|
-		os[\in].value_(val).changed(\value);
+		cvs[\in].value_(val).changed(\value);
 	}
-	out {^os[\out].value}
+	out {^cvs[\out].value}
 	out_ {|val|
-		os[\out].value_(val).changed(\value);
+		cvs[\out].value_(val).changed(\value);
 	}
-	lag {^os[\lag].value}
+	lag {^cvs[\lag].value}
 	lag_ {|val|
-		os[\lag].value_(val).changed(\value);
+		cvs[\lag].value_(val).changed(\value);
 	}
 	free {
 		synth.free;
