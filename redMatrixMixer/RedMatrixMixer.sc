@@ -28,9 +28,9 @@ RedMatrixMixer {
 			out: Ref(argOut),
 			lag: Ref(argLag)
 		);
-		SimpleController(cvs[\in]).put(\value, {|ref| synth.set(\in, ref.value)});
-		SimpleController(cvs[\out]).put(\value, {|ref| synth.set(\out, ref.value)});
-		SimpleController(cvs[\lag]).put(\value, {|ref| synth.set(\lag, ref.value)});
+		SimpleController(cvs.in).put(\value, {|ref| synth.set(\in, ref.value)});
+		SimpleController(cvs.out).put(\value, {|ref| synth.set(\out, ref.value)});
+		SimpleController(cvs.lag).put(\value, {|ref| synth.set(\lag, ref.value)});
 
 		forkIfNeeded{
 			if(groupPassedIn.not, {
@@ -83,12 +83,12 @@ RedMatrixMixer {
 		defString= defString++"\n});";
 		^defString.interpret;
 	}
-	in {^cvs[\in].value}
-	in_ {|val| cvs[\in].value_(val).changed(\value)}
-	out {^cvs[\out].value}
-	out_ {|val| cvs[\out].value_(val).changed(\value)}
-	lag {^cvs[\lag].value}
-	lag_ {|val| cvs[\lag].value_(val).changed(\value)}
+	in {^cvs.in.value}
+	in_ {|val| cvs.in.value_(val).changed(\value)}
+	out {^cvs.out.value}
+	out_ {|val| cvs.out.value_(val).changed(\value)}
+	lag {^cvs.lag.value}
+	lag_ {|val| cvs.lag.value_(val).changed(\value)}
 	free {
 		synth.free;
 		if(groupPassedIn.not, {group.free});

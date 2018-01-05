@@ -58,7 +58,7 @@ RedMatrixMixerGUI {
 				redMatrixMixer.in= val;
 				inNumbers.do{|x, i| x.string= "i"++(i+val)};
 			});
-			inBoxController= SimpleController(redMatrixMixer.cvs[\in]).put(\value, {|ref|
+			inBoxController= SimpleController(redMatrixMixer.cvs.in).put(\value, {|ref|
 				inBox.value= ref.value;
 				inNumbers.do{|x, i| x.string= "i"++(i+ref.value)};
 			});
@@ -74,7 +74,7 @@ RedMatrixMixerGUI {
 				redMatrixMixer.out= val;
 				outNumbers.do{|x, i| x.string= "o"++(i+val)};
 			});
-			outBoxController= SimpleController(redMatrixMixer.cvs[\out]).put(\value, {|ref|
+			outBoxController= SimpleController(redMatrixMixer.cvs.out).put(\value, {|ref|
 				outBox.value= ref.value;
 				outNumbers.do{|x, i| x.string= "o"++(i+ref.value)};
 			});
@@ -88,7 +88,7 @@ RedMatrixMixerGUI {
 			.action_({|v|
 				redMatrixMixer.lag= v.value.max(0);
 			});
-			lagBoxController= SimpleController(redMatrixMixer.cvs[\lag]).put(\value, {|ref|
+			lagBoxController= SimpleController(redMatrixMixer.cvs.lag).put(\value, {|ref|
 				lagBox.value= ref.value;
 			});
 			lagBox.onClose_({lagBoxController.remove});

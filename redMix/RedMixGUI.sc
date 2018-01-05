@@ -25,7 +25,7 @@ RedMixGUI {
 		inA= RedNumberBox(cmp);
 		inA.value= redMix.inA;
 		inA.action= {|view| redMix.inA= view.value.round.max(0)};
-		inAController= SimpleController(redMix.cvs[\inA]).put(\value, {|ref| inA.value= ref.value});
+		inAController= SimpleController(redMix.cvs.inA).put(\value, {|ref| inA.value= ref.value});
 		inA.onClose= {inAController.remove};
 		RedStaticText(cmp, "inA ("++redMix.def.metadata.info.inA++")");
 
@@ -33,7 +33,7 @@ RedMixGUI {
 		inB= RedNumberBox(cmp);
 		inB.value= redMix.inB;
 		inB.action= {|view| redMix.inB= view.value.round.max(0)};
-		inBController= SimpleController(redMix.cvs[\inB]).put(\value, {|ref| inB.value= ref.value});
+		inBController= SimpleController(redMix.cvs.inB).put(\value, {|ref| inB.value= ref.value});
 		inB.onClose= {inBController.remove};
 		RedStaticText(cmp, "inB ("++redMix.def.metadata.info.inB++")");
 
@@ -41,7 +41,7 @@ RedMixGUI {
 		out= RedNumberBox(cmp);
 		out.value= redMix.out;
 		out.action= {|view| redMix.out= view.value.round.max(0)};
-		outController= SimpleController(redMix.cvs[\out]).put(\value, {|ref| out.value= ref.value});
+		outController= SimpleController(redMix.cvs.out).put(\value, {|ref| out.value= ref.value});
 		out.onClose= {outController.remove};
 		RedStaticText(cmp, "out (stereo)");
 
@@ -49,7 +49,7 @@ RedMixGUI {
 		lag= RedNumberBox(cmp);
 		lag.value= redMix.lag;
 		lag.action= {|view| redMix.lag= view.value.max(0)};
-		lagController= SimpleController(redMix.cvs[\lag]).put(\value, {|ref| lag.value= ref.value});
+		lagController= SimpleController(redMix.cvs.lag).put(\value, {|ref| lag.value= ref.value});
 		lag.onClose= {lagController.remove};
 		RedStaticText(cmp, "lag");
 
@@ -58,8 +58,8 @@ RedMixGUI {
 		mixamp.x= mixSpec.unmap(redMix.mix);
 		mixamp.y= redMix.amp;
 		mixamp.action= {|view| redMix.mix= mixSpec.map(view.x); redMix.amp= view.y};
-		mixController= SimpleController(redMix.cvs[\mix]).put(\value, {|ref| mixamp.x= mixSpec.unmap(ref.value)});
-		ampController= SimpleController(redMix.cvs[\amp]).put(\value, {|ref| mixamp.y= ref.value});
+		mixController= SimpleController(redMix.cvs.mix).put(\value, {|ref| mixamp.x= mixSpec.unmap(ref.value)});
+		ampController= SimpleController(redMix.cvs.amp).put(\value, {|ref| mixamp.y= ref.value});
 		mixamp.onClose= {mixController.remove; ampController.remove};
 		mixamp.mouseUpAction= {|view, x, y, mod| if(mod.isCtrl, {{redMix.mix= 0}.defer(0.1)})};
 	}

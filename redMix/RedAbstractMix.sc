@@ -21,12 +21,12 @@ RedAbstractMix {	//abstract class
 		cvs.mix= Ref(0);
 		cvs.amp= Ref(1);
 		cvs.lag= Ref(argLag);
-		SimpleController(cvs[\inA]).put(\value, {|ref| synth.set(\inA, ref.value)});
-		SimpleController(cvs[\inB]).put(\value, {|ref| synth.set(\inB, ref.value)});
-		SimpleController(cvs[\out]).put(\value, {|ref| synth.set(\out, ref.value)});
-		SimpleController(cvs[\mix]).put(\value, {|ref| synth.set(\mix, ref.value)});
-		SimpleController(cvs[\amp]).put(\value, {|ref| synth.set(\amp, ref.value)});
-		SimpleController(cvs[\lag]).put(\value, {|ref| synth.set(\lag, ref.value)});
+		SimpleController(cvs.inA).put(\value, {|ref| synth.set(\inA, ref.value)});
+		SimpleController(cvs.inB).put(\value, {|ref| synth.set(\inB, ref.value)});
+		SimpleController(cvs.out).put(\value, {|ref| synth.set(\out, ref.value)});
+		SimpleController(cvs.mix).put(\value, {|ref| synth.set(\mix, ref.value)});
+		SimpleController(cvs.amp).put(\value, {|ref| synth.set(\amp, ref.value)});
+		SimpleController(cvs.lag).put(\value, {|ref| synth.set(\lag, ref.value)});
 
 		forkIfNeeded{
 			server.bootSync;
@@ -42,18 +42,18 @@ RedAbstractMix {	//abstract class
 		};
 	}
 	def {^this.class.def}
-	inA {^cvs[\inA].value}
-	inA_ {|val| cvs[\inA].value_(val).changed(\value)}
-	inB {^cvs[\inB].value}
-	inB_ {|val| cvs[\inB].value_(val).changed(\value)}
-	out {^cvs[\out].value}
-	out_ {|val| cvs[\out].value_(val).changed(\value)}
-	mix {^cvs[\mix].value}
-	mix_ {|val| cvs[\mix].value_(val).changed(\value)}
-	amp {^cvs[\amp].value}
-	amp_ {|val| cvs[\amp].value_(val).changed(\value)}
-	lag {^cvs[\lag].value}
-	lag_ {|val| cvs[\lag].value_(val).changed(\value)}
+	inA {^cvs.inA.value}
+	inA_ {|val| cvs.inA.value_(val).changed(\value)}
+	inB {^cvs.inB.value}
+	inB_ {|val| cvs.inB.value_(val).changed(\value)}
+	out {^cvs.out.value}
+	out_ {|val| cvs.out.value_(val).changed(\value)}
+	mix {^cvs.mix.value}
+	mix_ {|val| cvs.mix.value_(val).changed(\value)}
+	amp {^cvs.amp.value}
+	amp_ {|val| cvs.amp.value_(val).changed(\value)}
+	lag {^cvs.lag.value}
+	lag_ {|val| cvs.lag.value_(val).changed(\value)}
 	free {
 		synth.free;
 	}
