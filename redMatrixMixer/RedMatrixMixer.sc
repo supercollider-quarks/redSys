@@ -37,7 +37,6 @@ RedMatrixMixer {
 				server.bootSync;
 				group= Group.after(server.defaultGroup);
 				server.sync;
-				CmdPeriod.doOnce({group.free});
 			}, {
 				group= argGroup;
 			});
@@ -90,8 +89,11 @@ RedMatrixMixer {
 	lag {^cvs.lag.value}
 	lag_ {|val| cvs.lag.value_(val).changed(\value)}
 	free {
-		synth.free;
-		if(groupPassedIn.not, {group.free});
+		if(groupPassedIn.not, {
+			group.free;
+		}, {
+			synth.free;
+		});
 	}
 	gui {|position|
 		^RedMatrixMixerGUI(this, position);

@@ -27,7 +27,7 @@ ARGUMENT:: out
 Offset of first out bus.
 
 ARGUMENT:: group
-code::nil:: boots the default server and creates a group after the code::defaultGroup::.
+if code::nil:: matrixmixer will boot the default server and creates a group after the code::defaultGroup::. if a link::Classes/Group:: then that will be used (also its server). Note that a passed in group object is not freed with calling matrixmixer's link::#-free::.
 
 ARGUMENT:: lag
 For amplitudes in seconds.
@@ -49,7 +49,7 @@ METHOD:: def
 Generate a link::Classes/SynthDef::.
 
 METHOD:: free
-Free all synths.
+Free all internal synths and groups (not passed in groups).
 
 METHOD:: gui
 Create a link::Classes/RedMatrixMixerGUI:: for this RedMatrixMixer.
@@ -101,7 +101,7 @@ a.o1= [0, 1, 0, 0.2];	//in1 to out1 with full amp, in3 to out1 with 0.2 amp
 a.in= 1;	//change to listen to input busses to 1-4
 
 a.out= 1;	//left channel still outputs because the pbinds plays there
-	//and no ReplaceOut is blocking it
+//and no ReplaceOut is blocking it
 a.out= 0;
 a.in= 0;
 
