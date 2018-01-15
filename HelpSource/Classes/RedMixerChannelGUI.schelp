@@ -4,9 +4,6 @@ CATEGORIES:: Red>redMixer
 RELATED:: Classes/RedMixerChannel, Classes/RedMixerGUI, Classes/RedMixer, Classes/RedEffectsRackGUI
 
 DESCRIPTION::
-NOTE::
-Requires link::Classes/Conductor:: quark.
-::
 
 CLASSMETHODS::
 
@@ -36,12 +33,34 @@ Close the window if open.
 EXAMPLES::
 
 CODE::
-a= RedMixerChannel(#[0, 1]);
-b= Pbind(\pan, Pseq([-1, 1], inf), \amp, 0.5).play
-c= RedMixerChannelGUI(a, name: "testing")
-a.cvs.eqHi.input= 1
-a.cvs.eqHi.input= 0
+a= RedMixerChannel(0);
+b= Pbind(\pan, Pseq([-1, 1], inf), \dur, 0.5, \amp, 0.5).play;
+c= RedMixerChannelGUI(a, name: "testing");
+a.mute= 1
+a.mute= 0
+a.vol= -12
+c.text= "a stereo channel"
 a.free
-b.stop
 c.close
+b.stop
+
+a= RedMixerChannel(0);
+b= {WhiteNoise.ar(0.1!2)}.play;
+c= RedMixerChannelGUI(a, name: "testing");
+a.eqHi= 1
+a.hiGain= -20
+a.eqLo= 1
+a.loFreq= 200
+a.loGain= -90
+a.vol= -6
+a.out= 1
+a.store("~/Desktop/redMixerChannelGUI-test.txt".standardizePath)
+//recompile
+s.boot
+b= {WhiteNoise.ar(0.1!2)}.play;
+a= RedMixerChannel.restoreFile("~/Desktop/redMixerChannelGUI-test.txt".standardizePath)
+a.init
+a.out
+c= RedMixerChannelGUI(a, name: "testing");
+a.out= 0
 ::

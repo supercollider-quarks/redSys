@@ -1,226 +1,286 @@
 //redFrik
 
 //--related:
-//RedMixerChannel RedEffectModuleGUI
+//RedMixerChannel RedMixerGUI RedEffectModuleGUI
+
+//todo: numberbox for out bus?
+//todo: how to deal with inserts and archiving?
 
 RedMixerChannelGUI {
-	classvar <>width= 110, <>height= 280;
+	classvar <>width= 110, <>height= 280, <>numInserts= 2;
 	var <redMixerChannel, <parent, position,
-		<views, <mirror, win,
-		insert0Efx, insert1Efx, insert0But, insert1But, insert0Win, insert1Win;
+	win, <views, <cmp, textView,
+	insertEfxs, insertWins;
 	*new {|redMixerChannel, parent, position, name|
-		^super.newCopyArgs(redMixerChannel, parent, position).initRedMixerChannelGUI(false, name);
+		^super.newCopyArgs(redMixerChannel, parent, position).initRedMixerChannelGUI(name);
 	}
-	*newMirror {|redMixerChannel, parent, position, name|
-		^super.newCopyArgs(redMixerChannel, parent, position).initRedMixerChannelGUI(true, name);
-	}
-	*initClass {
-		Class.initClassTree(CV);
-		StartUp.add({
-			if('SCButton'.asClass.notNil, {
-				CV.viewDictionary.put(SCButton, CVSyncValue);
-			});
-			if('JSCButton'.asClass.notNil, {
-				CV.viewDictionary.put(JSCButton, CVSyncValue);
-			});
-			if('QButton'.asClass.notNil, {
-				CV.viewDictionary.put(QButton, CVSyncValue);
-			});
-			if('SCLevelIndicator'.asClass.notNil, {
-				CV.viewDictionary.put(SCLevelIndicator, CVSyncValue);
-			});
-			//if('JLevelIndicator'.asClass.notNil, {	//for swing todo!!!
-			//	CV.viewDictionary.put(JLevelIndicator, CVSyncValue);
-			//});
-			if('QLevelIndicator'.asClass.notNil, {
-				CV.viewDictionary.put(QLevelIndicator, CVSyncValue);
-			});
-		});
-	}
-	initRedMixerChannelGUI {|argMirror, name|
-		var cmp, classes, cmpTmp, tmp;
-		views= [];
-		mirror= argMirror;
-		if(mirror, {
-			classes= (
-				\slider: RedGUICVSliderMirror,
-				\knob: RedGUICVKnobMirror,
-				\button: RedGUICVButtonMirror,
-				\sliderNumber: RedGUICVSliderNumberMirror,
-				\sliderNumberName: RedGUICVSliderNumberNameMirror
-			);
-		}, {
-			classes= (
-				\slider: RedGUICVSlider,
-				\knob: RedGUICVKnob,
-				\button: RedGUICVButton,
-				\sliderNumber: RedGUICVSliderNumber,
-				\sliderNumberName: RedGUICVSliderNumberName
-			);
-		});
+	initRedMixerChannelGUI {|name|
+		var tmp, tmpWidth;
+		var peakButtons, peakLevels;
+		var volSpec= #[-90, 6, \db].asSpec;
+		var volWarp= DbFaderWarp(volSpec);
+		var freqSpec= \freq.asSpec;
+		var bandSpec= ControlSpec(0.25, 2, 'exp', 0, 1);
+		var gainSpec= #[-40, 20, \db, 0, 0].asSpec;
+		var controllers= List.new;
 		cmp= this.prContainer;
-		
+
 		//--effect inserts
-		tmp= (cmp.bounds.width*0.7)@14;
-		RedPopUpMenu(cmp, tmp)
-			.items_(["_inserts_"]++RedEffectModule.subclasses.collect{|x| x.name})
+		insertEfxs= Array.newClear(numInserts);
+		insertWins= Array.newClear(numInserts);
+		numInserts.do{|i|
+			var popup, button;
+			tmp= Point(cmp.bounds.width*0.7, 14);
+			popup= RedPopUpMenu(cmp, tmp)
+			.items_(["_inserts_"]++RedEffectModule.subclasses.collect{|x| x.name});
+			tmp= Point(cmp.decorator.indentedRemaining.width, 14);
+			button= RedButton(cmp, tmp, "o", "o")
 			.action_{|view|
-				if(insert0Efx.notNil, {
-					if(insert0Win.notNil, {
-						insert0Win.close;
-						insert0Win= nil;
-						insert0But.value= 0;
-					});
-					redMixerChannel.remove(insert0Efx);
-					insert0Efx= nil;
-				});
-				if(view.value>0, {
-					Routine({
-						insert0Efx= RedEffectModule.subclasses[view.value-1].new;
-						redMixerChannel.insert(insert0Efx, \addToHead);
-					}).play(AppClock);
-				});
-			};
-		tmp= cmp.decorator.indentedRemaining.width@14;
-		insert0But= RedButton(cmp, tmp, "o", "o")
-			.action_{|view|
+				var efx, win;
 				if(view.value==1, {
-					if(insert0Efx.notNil, {
-						insert0Win= redMixerChannel.inserts.detect{|x| x==insert0Efx}
-							.gui(nil, parent.bounds.right@(parent.bounds.bottom-80));
+					if(popup.value>0, {
+						Routine({
+							var pos;
+							efx= RedEffectModule.subclasses[popup.value-1].new;
+							redMixerChannel.insert(efx, #[\addToHead, \addToTail].clipAt(i));
+							pos= Point(parent.bounds.right, parent.bounds.bottom-80-(i*110));
+							win= efx.gui(nil, pos);
+							insertEfxs[i]= efx;
+							insertWins[i]= win;
+							win.onClose= {
+								redMixerChannel.remove(insertEfxs[i]);
+								insertEfxs[i]= nil;
+								view.value= 0;
+							};
+						}).play(AppClock);
 					});
 				}, {
-					if(insert0Win.notNil, {
-						insert0Win.close;
-						insert0Win= nil;
+					if(insertWins[i].notNil, {
+						insertWins[i].close;
+						insertWins[i]= nil;
 					});
 				});
 			};
-		cmp.decorator.nextLine;
-		tmp= (cmp.bounds.width*0.7)@14;
-		RedPopUpMenu(cmp, tmp)
-			.items_(["_inserts_"]++RedEffectModule.subclasses.collect{|x| x.name})
-			.action_{|view|
-				if(insert1Efx.notNil, {
-					if(insert1Win.notNil, {
-						insert1Win.close;
-						insert1Win= nil;
-						insert1But.value= 0;
-					});
-					redMixerChannel.remove(insert1Efx);
-					insert1Efx= nil;
-				});
-				if(view.value>0, {
-					Routine({
-						insert1Efx= RedEffectModule.subclasses[view.value-1].new;
-						redMixerChannel.insert(insert1Efx, \addToTail);
-					}).play(AppClock);
-				});
-			};
-		tmp= cmp.decorator.indentedRemaining.width@14;
-		insert1But= RedButton(cmp, tmp, "o", "o")
-			.action_{|view|
-				if(view.value==1, {
-					if(insert1Efx.notNil, {
-						insert1Win= redMixerChannel.inserts.detect{|x| x==insert1Efx}
-							.gui(nil, parent.bounds.right@(parent.bounds.bottom-180));
-					});
-				}, {
-					if(insert1Win.notNil, {
-						insert1Win.close;
-						insert1Win= nil;
-					});
-				});
-			};
-		cmp.decorator.nextLine;
-		
+			cmp.decorator.nextLine;
+		};
+
 		//--equaliser
-		views= views++classes[\knob].new(cmp, 20@20, redMixerChannel.cvs.hiFreq);
-		views= views++classes[\knob].new(cmp, 20@20, redMixerChannel.cvs.hiBand);
-		views= views++classes[\knob].new(cmp, 20@20, redMixerChannel.cvs.hiGain);
-		tmp= cmp.decorator.indentedRemaining.width@14;
-		/*views= views++*/classes[\button].new(cmp, tmp, redMixerChannel.cvs.eqHi, "hi", "hi");
+		views= List.new;
+		views.add(
+			RedGUICVKnob(cmp, Point(20, 20), redMixerChannel.cvs.hiFreq,
+				{|x| freqSpec.map(x)}, {|x| freqSpec.unmap(x)})
+		);
+		views.add(
+			RedGUICVKnob(cmp, Point(20, 20), redMixerChannel.cvs.hiBand,
+				{|x| bandSpec.map(x)}, {|x| bandSpec.unmap(x)})
+		);
+		views.add(
+			RedGUICVKnob(cmp, Point(20, 20), redMixerChannel.cvs.hiGain,
+				{|x| gainSpec.map(x)}, {|x| gainSpec.unmap(x)})
+		);
+		tmp= Point(cmp.decorator.indentedRemaining.width, 14);
+		views.add(
+			RedGUICVButton(cmp, tmp, redMixerChannel.cvs.eqHi, nil, nil, (str: "hi"))
+		);
 		cmp.decorator.nextLine;
-		
-		views= views++classes[\knob].new(cmp, 20@20, redMixerChannel.cvs.miFreq);
-		views= views++classes[\knob].new(cmp, 20@20, redMixerChannel.cvs.miBand);
-		views= views++classes[\knob].new(cmp, 20@20, redMixerChannel.cvs.miGain);
-		tmp= cmp.decorator.indentedRemaining.width@14;
-		/*views= views++*/classes[\button].new(cmp, tmp, redMixerChannel.cvs.eqMi, "mi", "mi");
+
+		views.add(
+			RedGUICVKnob(cmp, Point(20, 20), redMixerChannel.cvs.miFreq,
+				{|x| freqSpec.map(x)}, {|x| freqSpec.unmap(x)})
+		);
+		views.add(
+			RedGUICVKnob(cmp, Point(20, 20), redMixerChannel.cvs.miBand,
+				{|x| bandSpec.map(x)}, {|x| bandSpec.unmap(x)})
+		);
+		views.add(
+			RedGUICVKnob(cmp, Point(20, 20), redMixerChannel.cvs.miGain,
+				{|x| gainSpec.map(x)}, {|x| gainSpec.unmap(x)})
+		);
+		tmp= Point(cmp.decorator.indentedRemaining.width, 14);
+		views.add(
+			RedGUICVButton(cmp, tmp, redMixerChannel.cvs.eqMi, nil, nil, (str: "mi"))
+		);
 		cmp.decorator.nextLine;
-		
-		views= views++classes[\knob].new(cmp, 20@20, redMixerChannel.cvs.loFreq);
-		views= views++classes[\knob].new(cmp, 20@20, redMixerChannel.cvs.loBand);
-		views= views++classes[\knob].new(cmp, 20@20, redMixerChannel.cvs.loGain);
-		tmp= cmp.decorator.indentedRemaining.width@14;
-		/*views= views++*/classes[\button].new(cmp, tmp, redMixerChannel.cvs.eqLo, "lo", "lo");
+
+		views.add(
+			RedGUICVKnob(cmp, Point(20, 20), redMixerChannel.cvs.loFreq,
+				{|x| freqSpec.map(x)}, {|x| freqSpec.unmap(x)})
+		);
+		views.add(
+			RedGUICVKnob(cmp, Point(20, 20), redMixerChannel.cvs.loBand,
+				{|x| bandSpec.map(x)}, {|x| bandSpec.unmap(x)})
+		);
+		views.add(
+			RedGUICVKnob(cmp, Point(20, 20), redMixerChannel.cvs.loGain,
+				{|x| gainSpec.map(x)}, {|x| gainSpec.unmap(x)})
+		);
+		tmp= Point(cmp.decorator.indentedRemaining.width, 14);
+		views.add(
+			RedGUICVButton(cmp, tmp, redMixerChannel.cvs.eqLo, nil, nil, (str: "lo"))
+		);
 		cmp.decorator.nextLine;
-		
-		//--balance and mute
-		views= views++classes[\slider].new(cmp, (cmp.bounds.width*0.7)@14, redMixerChannel.cvs.bal);
-		views.last.slider.mouseUpAction_{|view, x, y, mod|
-			if(mod&262144==262144, {			//ctrl to reset balance
-				{redMixerChannel.cvs.bal.value= 0}.defer(0.1);
+
+		//--balance
+		views.add(
+			RedGUICVSlider(
+				cmp,
+				Point(cmp.bounds.width*0.7, 14),
+				redMixerChannel.cvs.bal,
+				{|x| x*2-1},
+				{|x| x*0.5+0.5}
+			)
+		);
+		views.last.view.mouseUpAction_{|view, x, y, mod|
+			if(mod.isCtrl, {	//ctrl to center balance
+				{redMixerChannel.bal= 0}.defer(0.1);
 			});
 		};
-		tmp= cmp.decorator.indentedRemaining.width@14;
-		RedButton(cmp, tmp, "m", "m")
-			.action_{|view| redMixerChannel.mute(view.value.booleanValue)};
+
+		//--mute
+		tmp= Point(cmp.decorator.indentedRemaining.width, 14);
+		views.add(
+			RedGUICVButton(
+				cmp,
+				tmp,
+				redMixerChannel.cvs.mute,
+				nil,
+				nil,
+				(str: "m")
+			)
+		);
 		cmp.decorator.nextLine;
-		
-		//--volume
+
+		//--volume number
 		tmp= cmp.decorator.indentedRemaining;
-		views= views++if(name.isNil, {
-			classes[\sliderNumber];
-		}, {
-			classes[\sliderNumberName];
-		}).new(cmp, (tmp.width*0.5)@tmp.height, redMixerChannel.cvs.vol, name);
-		views.last.slider.mouseUpAction_{|view, x, y, mod|
-			if(mod&262144==262144, {			//ctrl to reset volume
-				{redMixerChannel.cvs.vol.value= 0}.defer(0.1);
+		views.add(
+			RedGUICVNumberBox(
+				cmp,
+				Point(tmp.width*0.45, RedGUICVNumberBox.defaultHeight),
+				redMixerChannel.cvs.amp,
+				{|x| x.dbamp},
+				{|x| x.ampdb}
+			)
+		);
+
+		//--peaks
+		CompositeView(cmp, Point(12, RedGUICVNumberBox.defaultHeight));	//dummy spacer
+		tmpWidth= cmp.decorator.indentedRemaining.width*0.5-(cmp.decorator.gap.x/2);
+		peakButtons= [
+			RedButton(cmp, Point(tmpWidth, RedGUICVNumberBox.defaultHeight), "", ""),
+			RedButton(cmp, Point(tmpWidth, RedGUICVNumberBox.defaultHeight), "", "")
+		];
+		peakButtons.do{|x|
+			x.canFocus_(false);
+		};
+		controllers.add(
+			SimpleController(redMixerChannel.cvs.peaks).put(\value, {|ref|
+				defer{
+					ref.value.do{|x, i|
+						if(x>1 and:{peakButtons[i].value==0}, {
+							peakButtons[i].value= 1;
+						}, {
+							if(x<=1 and:{peakButtons[i].value==1}, {
+								peakButtons[i].value= 0;
+							});
+						});
+					};
+				};
+			})
+		);
+		cmp.decorator.nextLine;
+
+		//--volume slider
+		tmp= cmp.decorator.indentedRemaining;
+		if(name.notNil, {
+			tmp= tmp-Point(0, RedGUICVNumberBox.defaultHeight-cmp.decorator.gap.y);
+		});
+		views.add(
+			RedGUICVSlider(
+				cmp,
+				Point(tmp.width*0.45, tmp.height),
+				redMixerChannel.cvs.amp,
+				{|x| volWarp.map(x).dbamp},
+				{|x| volWarp.unmap(x.ampdb)}
+			)
+		);
+		views.last.view.mouseUpAction_{|view, x, y, mod|
+			if(mod.isCtrl, {	//ctrl to reset volume
+				{redMixerChannel.vol= 0}.defer(0.1);
 			});
 		};
-		tmp= 12@cmp.decorator.indentedRemaining.height;
-		cmpTmp= CompositeView(cmp, tmp);
-		tmp= cmpTmp.bounds.height*(1-redMixerChannel.cvs.vol.spec.unmap(0))-6+14;
-		RedStaticText(cmpTmp,"-u", Rect(0, tmp, 12, 12));
-		
-		//--meters
-		cmpTmp= CompositeView(cmp, cmp.decorator.indentedRemaining);
-		tmp= cmpTmp.bounds.width*0.5;
-		redMixerChannel.cvs.peaked0.connect(RedButton(cmpTmp, Rect(0, 0, tmp, 14), "", "").canFocus_(false));
-		redMixerChannel.cvs.peaked1.connect(RedButton(cmpTmp, Rect(tmp, 0, tmp, 14), "", "").canFocus_(false));
-		if(name.isNil, {
-			redMixerChannel.cvs.peak0.connect(RedLevelIndicator(cmpTmp, Rect(0, tmp, tmp, cmpTmp.bounds.height-tmp)).canFocus_(false));
-			redMixerChannel.cvs.peak1.connect(RedLevelIndicator(cmpTmp, Rect(tmp, tmp, tmp, cmpTmp.bounds.height-tmp)).canFocus_(false));
-		}, {
-			redMixerChannel.cvs.peak0.connect(RedLevelIndicator(cmpTmp, Rect(0, tmp, tmp, cmpTmp.bounds.height-tmp-14)).canFocus_(false));
-			redMixerChannel.cvs.peak1.connect(RedLevelIndicator(cmpTmp, Rect(tmp, tmp, tmp, cmpTmp.bounds.height-tmp-14)).canFocus_(false));
+
+		//--unity gain marking
+		RedStaticText(
+			CompositeView(cmp, Point(12, tmp.height)),
+			Rect(0, 1-volSpec.unmap(0)*tmp.height, 12, 12),
+			"-u"
+		);
+
+		//--levels
+		peakLevels= [
+			RedLevelIndicator(cmp, Point(tmpWidth, tmp.height)),
+			RedLevelIndicator(cmp, Point(tmpWidth, tmp.height))
+		];
+		peakLevels.do{|x|
+			x.canFocus_(false);
+			x.warning_(volSpec.unmap(-3));
+			x.critical_(volSpec.unmap(0));
+		};
+		controllers.add(
+			SimpleController(redMixerChannel.cvs.levels).put(\value, {|ref|
+				defer{
+					ref.value.do{|x, i| peakLevels[i].value= volSpec.unmap(x.ampdb)};
+				};
+			})
+		);
+
+		//--name
+		if(name.notNil, {
+			cmp.decorator.nextLine;
+			tmp= name.bounds(RedFont.new).width;
+			cmp.decorator.shift((cmp.bounds.width-tmp*0.25).max(0), -4);
+			textView= RedStaticText(cmp, nil, name);
+		});
+
+		cmp.onClose_({controllers.do{|x| x.remove}});
+	}
+	text_ {|str|
+		var tmp, tmp2;
+		if(textView.notNil, {
+			tmp= textView.string.bounds(RedFont.new).width;
+			tmp2= str.bounds(RedFont.new).width+2;
+			textView.bounds= Rect(
+				textView.bounds.left-(tmp2-tmp/4),
+				textView.bounds.top,
+				tmp2,
+				textView.bounds.height
+			);
+			textView.string= str;
 		});
 	}
 	close {
-		if(insert0Win.notNil, {insert0Win.close});
-		if(insert1Win.notNil, {insert1Win.close});
+		insertWins.do{|x| if(x.notNil, {x.close})};
 		if(win.notNil and:{win.isClosed.not}, {win.close});
 	}
-	
+
 	//--private
 	prContainer {
-		var cmp, width, height, margin= 4@4, gap= 4@4;
-		position= position ?? {500@500};
+		var cmp, width, height, margin= Point(4, 4), gap= Point(4, 4);
+		position= position ?? {Point(500, 500)};
 		width= RedMixerChannelGUI.width;
 		height= RedMixerChannelGUI.height;
 		if(parent.isNil, {
-			parent= Window(redMixerChannel.class.name, Rect(position.x, position.y, width, height), false);
-			win= parent;
-			if(Main.versionAtMost(3, 4) and:{GUI.scheme!=\cocoa}, {
-				win.alpha= GUI.skins.redFrik.unfocus;
-			});
+			win= Window(
+				redMixerChannel.class.name,
+				Rect(position.x, position.y, width, height),
+				false
+			);
+			parent= win;
 			win.front;
 			CmdPeriod.doOnce({if(win.isClosed.not, {win.close})});
 		});
-		cmp= CompositeView(parent, width@height)
-			.background_(GUI.skins.redFrik.background);
+		cmp= CompositeView(parent, Point(width, height))
+		.background_(GUI.skins.redFrik.background);
 		cmp.decorator= FlowLayout(cmp.bounds, margin, gap);
 		cmp.onClose= {this.close};
 		^cmp;

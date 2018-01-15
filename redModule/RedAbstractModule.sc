@@ -3,59 +3,72 @@
 //related:
 //RedEffectModule RedInstrumentModule RedAbstractMix
 
-RedAbstractModule {								//abstract class
+RedAbstractModule {	//abstract class
 	classvar <all;
-	var <>group, <cvs, <args, <defaultAddAction;
-	var prDef;
-	*new {|out= 0, group, defaultAddAction= \addToHead|
-		^super.new.initRedAbstract(out, group, defaultAddAction);
-	}
+	var <group, addAction, <cvs, <specs;
+	var condition, controllers;
 	*initClass {
-		all= [];
+		all= List.new;
 	}
-	initRedAbstract {|argOut, argGroup, argDefaultAddAction|
+	*new {|group, addAction|
+		^super.new.initRedAbstractModule(group, addAction);
+	}
+	initRedAbstractModule {|argGroup, argAddAction|
 		var server;
-		group= argGroup ?? {Server.default.defaultGroup};
-		server= group.server;
-		defaultAddAction= argDefaultAddAction;
-		
-		//--create cvs and argument array
+		condition= Condition();
+		if(argGroup.isNil, {
+			server= Server.default;
+		}, {
+			group= argGroup;
+			server= group.server;
+		});
+		addAction= argAddAction;
 		cvs= ();
-		args= [];
-		this.def.metadata[\order].do{|x|
-			var spec= this.def.metadata[\specs][x.key];
-			var cv= CV.new.spec_(spec);
-			if(x.key==\out and:{argOut!=0}, {
-				spec= spec.copy;
-				spec.default= argOut;
-				cv.value= argOut;
-			});
-			cvs.put(x.value, cv);
-			args= args.addAll([x.key, cv]);
+		specs= ();
+		controllers= List.new;
+		this.def.metadata[\order].do{|assoc|
+			var k= assoc.key;
+			var v= assoc.value;
+			var spec= this.def.metadata[\specs][k];
+			if(k==\out, {v= \out});	//special case
+			cvs.put(v, Ref(spec.default));
+			specs.put(k, spec);
 		};
-		
+		this.initMethods;
 		forkIfNeeded{
 			server.bootSync;
-			
-			//--send definition
 			this.def.add;
 			server.sync;
-			
-			//--create synth
-			this.prepareForPlay(server);
-			server.sync;
-			all= all.add(this);
+			condition.test= true;
+			condition.signal;
+			all.add(this);
 		};
 	}
-	defaults {cvs.do{|cv| cv.value= cv.spec.default}}
-	out {^this.cvFromControlName(\out).value}
-	out_ {|index| this.cvFromControlName(\out).value= index}
-	cvFromControlName {|name| ^cvs[this.def.metadata[\order].detect{|x| x.key==name}.value]}
-	def {^prDef ?? {prDef= this.class.def}}
-	
+	initMethods {
+		cvs.keysValuesDo{|k, v|
+			this.addUniqueMethod((k++"_").asSymbol, {|obj, val|
+				cvs[k].value_(specs[this.cvsToParam(k)].constrain(val)).changed(\value);
+				this;
+			});
+			this.addUniqueMethod(k, {|obj|
+				cvs[k].value;
+			});
+		};
+	}
+	cvsToParam {|name|
+		if(name==\out, {
+			^\out;
+		}, {
+			^this.def.metadata[\order].detect{|x| x.value==name}.key;
+		});
+	}
+	free {
+		controllers.do{|x| x.remove};
+		all.remove(this);
+	}
+	def {^this.class.def}
+
 	//--for subclasses
 	*def {^this.subclassResponsibility(thisMethod)}
-	prepareForPlay {|server| ^this.subclassResponsibility(thisMethod)}
-	free {^this.subclassResponsibility(thisMethod)}
 	gui {|parent, position| ^this.subclassResponsibility(thisMethod)}
 }

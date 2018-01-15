@@ -1,36 +1,30 @@
 //redFrik
 
-//--related:
-//RedAbstractSampler
-//RedInstrumentModule.subclasses
-//RedEffectModule.subclasses
+//unfinished and untested
 
 RedInstrumentModule : RedAbstractModule {		//abstract class
 	var <voices;
-	
-	prepareForPlay {|server|
-		group= group ?? {server.defaultGroup};
-		voices= List.new;
+	*new {|out= 0, group, addAction= \addToHead|
+		^super.new(group, addAction).initRedInstrumentModule(out);
+	}
+	initRedInstrumentModule {|out|
+		//initAction= {
+			cvs.out.value= out;	//override spec default with bus argument
+			voices= List.new;
+		//};
+	}
+	play {|key, args, aGroup, anAddAction|
+		var arr= cvs.asKeyValuePairs++args;
+		var synth;
+		synth= Synth(this.def.name, arr, aGroup?group, anAddAction?addAction);
+		voices.add(key -> synth);
 	}
 	free {
-		RedAbstractModule.all.remove(this);
-		this.stopAll;
+		voices.do{|x| x.free};
+		super.free;
 	}
 	gui {|parent, position|
 		^RedInstrumentGUI(parent, position);
-	}
-	
-	//--for all instruments
-	play {|key, args, addAction|
-		if(addAction.isNil, {
-			addAction= defaultAddAction;			//is by default \addToHead
-		});
-		if(args.isNil, {
-			args= this.args;
-		}, {
-			args= this.args.copy++args;				//override cvs by adding args last to array
-		});
-		voices.add(key -> Synth.controls(this.def.name, args, group, addAction));
 	}
 	stop {|key|
 		var i;
@@ -51,7 +45,7 @@ RedInstrumentModule : RedAbstractModule {		//abstract class
 	synth {|key|
 		^voices.detect{|x| x.key==key}.value;
 	}
-	
+
 	//--for subclasses
 	*def {^this.subclassResponsibility(thisMethod)}
 }

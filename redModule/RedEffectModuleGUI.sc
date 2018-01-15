@@ -1,63 +1,100 @@
 //redFrik
 
 //related:
-//RedEffectModule RedInstrumentModuleGUI RedMixGUI RedMixerChannelGUI
+//RedEffectModule RedMixGUI RedMixerChannelGUI
 
 RedEffectModuleGUI {
 	var <redEffectModule, <parent, position,
-		<views, <mirror, win;
+	win, <views, <cmp, <params;
 	*new {|redEffectModule, parent, position|
-		^super.newCopyArgs(redEffectModule, parent, position).initRedEffectModuleGUI(false);
+		^super.newCopyArgs(redEffectModule, parent, position).initRedEffectModuleGUI;
 	}
-	*newMirror {|redEffectModule, parent, position|
-		^super.newCopyArgs(redEffectModule, parent, position).initRedEffectModuleGUI(true);
-	}
-	initRedEffectModuleGUI {|argMirror|
-		var cmp, classes, params;
-		mirror= argMirror;
-		if(mirror, {
-			classes= (
-				\slider: RedGUICVSliderMirror,
-				\knob: RedGUICVKnobNumberNameMirror
-			);
-		}, {
-			classes= (
-				\slider: RedGUICVSlider,
-				\knob: RedGUICVKnobNumberName
-			);
-		});
+	initRedEffectModuleGUI {
+		var savedLeft= 0;
 		params= redEffectModule.def.metadata[\order].reject{|x| x.key==\out};
 		cmp= this.prContainer(params.size-1);
-		views= params.collect{|x|
-			if(x.key==\mix, {
-				classes[\slider].new(cmp, nil, redEffectModule.cvs[x.value]);
+		views= List.new;
+		params.do{|assoc|
+			var k= assoc.key;
+			var v= assoc.value;
+			if(k==\mix, {
+				views.add(
+					RedGUICVSlider(
+						cmp,
+						nil,
+						redEffectModule.cvs[v],
+						{|x| redEffectModule.specs[k].map(x)},
+						{|x| redEffectModule.specs[k].unmap(x)}
+					)
+				);
+				views.last.view.mouseUpAction_{|view, x, y, mod|
+					if(mod.isCtrl, {	//ctrl to center dry/wet mix
+						redEffectModule.cvs[v].value_(0).changed(\value);
+					});
+				};
+				savedLeft= cmp.decorator.left;
 			}, {
-				classes[\knob].new(cmp, nil, redEffectModule.cvs[x.value], x.value);
+				cmp.decorator.left= savedLeft;
+				cmp.decorator.top= cmp.decorator.gap.y;
+				views.add(
+					RedGUICVKnob(
+						cmp,
+						nil,
+						redEffectModule.cvs[v],
+						{|x| redEffectModule.specs[k].map(x)},
+						{|x| redEffectModule.specs[k].unmap(x)}
+					)
+				);
+				savedLeft= cmp.decorator.left;
+				cmp.decorator.shift(
+					0-RedGUICVKnob.defaultWidth,
+					RedGUICVKnob.defaultHeight
+				);
+				views.add(
+					RedGUICVNumberBox(
+						cmp,
+						nil,
+						redEffectModule.cvs[v],
+						{|x| redEffectModule.specs[k].constrain(x)},
+						{|x| redEffectModule.specs[k].constrain(x)}
+					)
+				);
+				v= v.asString;
+				cmp.decorator.shift(
+					2-RedGUICVNumberBox.defaultWidth-(v.bounds(RedFont.new).width/5)*1.1,
+					RedGUICVNumberBox.defaultHeight
+				);
+				RedStaticText(cmp, nil, v);
 			});
 		};
 	}
 	close {
 		if(win.notNil and:{win.isClosed.not}, {win.close});
 	}
-	
+	onClose_ {|func|
+		win.onClose= func;
+	}
+
 	//--private
-	prContainer {|size|
-		var cmp, width, height, margin= 4@4, gap= 4@4;
-		position= position ?? {400@400};
-		width= margin.x+RedGUICVSlider.defaultWidth+((RedGUICVKnobNumberName.defaultWidth+gap.x)*size)+margin.x;
-		height= margin.y+RedGUICVSlider.defaultHeight.max(RedGUICVKnobNumberName.defaultHeight)+margin.y;
+	prContainer {|num|
+		var cmp, width, height, margin= Point(4, 4), gap= Point(4, 4);
+		position= position ?? {Point(400, 400)};
+		width= margin.x*2+RedGUICVSlider.defaultWidth+(RedGUICVKnob.defaultWidth+gap.x*num);
+		height= margin.y*2+RedGUICVSlider.defaultHeight;
 		if(parent.isNil, {
-			parent= Window(redEffectModule.class.name, Rect(position.x, position.y, width, height), false);
-			win= parent;
-			if(Main.versionAtMost(3, 4) and:{GUI.scheme!=\cocoa}, {
-				win.alpha= GUI.skins.redFrik.unfocus;
-			});
+			win= Window(
+				redEffectModule.class.name,
+				Rect(position.x, position.y, width, height),
+				false
+			);
+			parent= win;
 			win.front;
 			CmdPeriod.doOnce({if(win.isClosed.not, {win.close})});
 		});
-		cmp= CompositeView(parent, width@height)
-			.background_(GUI.skins.redFrik.background);
+		cmp= CompositeView(parent, Point(width, height))
+		.background_(GUI.skins.redFrik.background);
 		cmp.decorator= FlowLayout(cmp.bounds, margin, gap);
+		cmp.onClose= {this.close};
 		^cmp;
 	}
 }

@@ -7,25 +7,13 @@ DESCRIPTION::
 WARNING::
 Do not instantiate. Use its subclasses.
 ::
-NOTE::
-Requires link::Classes/Conductor:: quark.
-::
 
 CLASSMETHODS::
 
 PRIVATE:: initClass
 
-METHOD:: new
-
-ARGUMENT:: out
-
-ARGUMENT:: group
-If code::nil:: then code::Server.default.defaultGroup:: will be used
-
-ARGUMENT:: defaultAddAction
-
 METHOD:: all
-Array of all registered modules.
+List of all registered modules.
 
 SUBSECTION:: subclass responsibility
 
@@ -33,25 +21,9 @@ METHOD:: def
 
 INSTANCEMETHODS::
 
-PRIVATE:: initRedAbstract
-
-METHOD:: defaults
-Revert all link::Classes/CV::s to their defaults.
-
-METHOD:: out
-Get or set current bus.
-
-METHOD:: cvFromControlName
-Mainly used internally for looking up link::Classes/CV::s from link::Classes/SynthDef:: control names.
-
-METHOD:: def
-Returns the link::Classes/SynthDef:: as defined in link::#*def::.
+PRIVATE:: initRedAbstractModule
 
 SUBSECTION:: subclass responsibility
-
-METHOD:: prepareForPlay
-
-METHOD:: free
 
 METHOD:: gui
 
@@ -59,15 +31,33 @@ EXAMPLES::
 
 CODE::
 a= RedEfxDist(0);
-b= {SinOsc.ar([400, 404], 0, 0.5)}.play
-a.group
-a.cvs
-a.cvs.distMix.input= 0.4
-a.args
-a.cvFromControlName(\out).dump
-a.cvFromControlName(\depth).dump
-a.def
-a.defaultAddAction
-a.free
-b.free
+c= {SinOsc.ar([400, 404], 0, 0.5)}.play;
+RedAbstractModule.all;
+RedEffectModule.all;
+RedEfxDist.all;
+a.cvs;
+a.distMix= 0;	//50% effect
+a.out= 1;	//move stereo effect to busses 1+2
+a.out= 0;	//move back to 0+1
+a.distDepth= 0.1;
+a.distDepth= 0.5;
+a.distFreq= 20;
+a.cvs;
+a.specs;
+a.free;
+c.free;
+
+s.plotTree;
+g= Group(s);
+h= Group(s);
+a= RedEfxDist(0, g);
+b= RedEfxVerb(0, g);
+c= {SinOsc.ar([400, 404], 0, LFSaw.ar(-1).max(0)*0.5)}.play;
+a.group;
+b.verbMix= 0;
+a.distMix= 0;
+a.group= h;
+a.free;
+b.free;
+c.free;
 ::

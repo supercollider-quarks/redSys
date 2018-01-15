@@ -5,10 +5,11 @@ RELATED:: Classes/RedAbstractModule, Classes/RedInstrumentModuleGUI, Classes/Red
 
 DESCRIPTION::
 WARNING::
-Do not instantiate. Use its subclasses.
+Unfinished!
 ::
-NOTE::
-Requires link::Classes/Conductor:: quark.
+
+WARNING::
+Do not instantiate. Use its subclasses.
 ::
 
 CLASSMETHODS::
@@ -19,7 +20,9 @@ METHOD:: def
 
 INSTANCEMETHODS::
 
-METHOD:: prepareForPlay
+PRIVATE:: initRedInstrumentModule
+
+METHOD:: play
 If no group given (*new method), then use the server code::defaultGroup::.
 
 METHOD:: free

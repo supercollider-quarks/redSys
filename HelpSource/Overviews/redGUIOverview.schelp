@@ -5,7 +5,7 @@ RELATED:: Overviews/redSysOverview, Overviews/redMixOverview
 
 TABLE::
 ## link::Classes/Red2DSlider:: || Red2DSlider(parent, bounds)
-## link::Classes/RedButton:: || RedButton(parent, bounds ...str)
+## link::Classes/RedButton:: || RedButton(parent, bounds ...strings)
 ## link::Classes/RedFont:: || RedFont()
 ## link::Classes/RedKnob:: || RedKnob(parent, bounds)
 ## link::Classes/RedLevelIndicator:: || RedLevelIndicator(parent, bounds)
@@ -14,7 +14,7 @@ TABLE::
 ## link::Classes/RedPopUpMenu:: || RedPopUpMenu(parent, bounds)
 ## link::Classes/RedPopUpTreeMenu:: || RedPopUpTreeMenu(parent, bounds)
 ## link::Classes/RedSlider:: || RedSlider(parent, bounds)
-## link::Classes/RedStaticText:: || RedStaticText(parent, string, bounds)
+## link::Classes/RedStaticText:: || RedStaticText(parent, bounds, string)
 ## link::Classes/RedTextView:: || RedTextView(parent, bounds)
 ::
 
@@ -36,7 +36,7 @@ RedNumberBox(w);
 RedPopUpMenu(w);
 RedPopUpTreeMenu(w);
 RedSlider(w);
-RedStaticText(w, "test123");
+RedStaticText(w, nil, "test123");
 RedTextView(w);
 )
 ::

@@ -7,29 +7,82 @@ DESCRIPTION::
 WARNING::
 Do not instantiate. Use its subclasses.
 ::
-NOTE::
-Requires link::Classes/Conductor:: quark.
-::
+
+CLASSMETHODS::
+
+METHOD:: new
+Create a new stereo effect module and boot the server if not already running. Server is taken from group argument.
+
+ARGUMENT:: out
+Which audio bus to use. Puts a link::Classes/ReplaceOut:: on this bus and the following (index+1).
+
+ARGUMENT:: group
+A link::Classes/Group::. Defaults to code::Server.default.defaultGroup::.
+
+ARGUMENT:: addAction
+
+A link::Classes/Symbol::.
 
 INSTANCEMETHODS::
 
-METHOD:: prepareForPlay
-
-ARGUMENT:: server
-Defaults to code::Server.default::.
+PRIVATE:: initRedEffectModule, prAddControllers
 
 METHOD:: free
-Remove module from code::RedAbstractModule.all::. Free the synth and (if created) the internal group.
+Free the synth and remove this module from code::RedAbstractModule.all::.
 
 METHOD:: gui
 Create a link::Classes/RedEffectModuleGUI::.
 
+ARGUMENT:: parent
+Can be a link::Classes/Window:: or a link::Classes/CompositeView::.
+
+ARGUMENT:: position
+A link::Classes/Point::.
+
 EXAMPLES::
 
 CODE::
+a= RedEfxBit8(0);
+c= {SinOsc.ar([400, 404], 0, 0.25)}.play;
+a.bit8Mix= 1;
+a.cvs;
+a.specs;
+a.bit8Rate= 0.1;
+a.free;
+c.free;
+
 a= RedEfxDist(0);
-b= {SinOsc.ar([400, 404], 0, 0.5)}.play
-a.gui
-a.free
-b.free
+c= {SinOsc.ar([400, 404], 0, 0.25)}.play;
+a.distMix= 0;
+a.distDepth= 0.1;
+g= a.gui;
+a.distFreq= 10;
+a.free;
+c.free;
+g.close;
+
+
+//--class template
+
+RedEfxTemp : RedEffectModule {
+	*def {
+		^SynthDef(\redEfxTemp, {|out= 0, mix= -1, amount= 1|
+			var dry, wet;
+			dry= In.ar(out, 2);
+			wet= dry*LFTri.ar(1, 0, amount, 1);
+			ReplaceOut.ar(out, XFade2.ar(dry, wet, mix));
+		}, metadata: (
+			specs: (
+				\out: \audiobus.asSpec,	//this should always be present
+				\mix: ControlSpec(-1, 1, 'lin', 0, -1),	//and this too
+				\amount: ControlSpec(0, 999, 'lin', 0, 1.5)
+			),
+			order: [
+				\out -> \tempOut,
+				\mix -> \tempMix,
+				\amount -> \tempAmount
+			]
+		));
+	}
+}
 ::

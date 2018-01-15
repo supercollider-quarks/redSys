@@ -3,6 +3,13 @@ SUMMARY:: gui for instrument modules
 CATEGORIES:: Red>redModule
 RELATED:: Classes/RedInstrumentModule, Classes/RedEffectModuleGUI
 
+DESCRIPTION::
+WARNING::
+Unfinished!
+::
+
+A standardized gui for link::Classes/RedInstrumentModule::s.
+
 INSTANCEMETHODS::
 
 PRIVATE:: initRedInstrumentGUI

@@ -5,7 +5,7 @@
 
 RedAbstractMix {	//abstract class
 	var <group, <cvs,
-	<isReady= false, synth;
+	<isReady= false, synth, controllers;
 	*new {|inA= 0, inB= 2, out= 0, group, lag= 0.05|
 		^super.new.initRedAbstractMix(inA, inB, out, group, lag);
 	}
@@ -21,12 +21,14 @@ RedAbstractMix {	//abstract class
 		cvs.mix= Ref(0);
 		cvs.amp= Ref(1);
 		cvs.lag= Ref(argLag);
-		SimpleController(cvs.inA).put(\value, {|ref| synth.set(\inA, ref.value)});
-		SimpleController(cvs.inB).put(\value, {|ref| synth.set(\inB, ref.value)});
-		SimpleController(cvs.out).put(\value, {|ref| synth.set(\out, ref.value)});
-		SimpleController(cvs.mix).put(\value, {|ref| synth.set(\mix, ref.value)});
-		SimpleController(cvs.amp).put(\value, {|ref| synth.set(\amp, ref.value)});
-		SimpleController(cvs.lag).put(\value, {|ref| synth.set(\lag, ref.value)});
+		controllers= List.newFrom([
+			SimpleController(cvs.inA).put(\value, {|ref| synth.set(\inA, ref.value)}),
+			SimpleController(cvs.inB).put(\value, {|ref| synth.set(\inB, ref.value)}),
+			SimpleController(cvs.out).put(\value, {|ref| synth.set(\out, ref.value)}),
+			SimpleController(cvs.mix).put(\value, {|ref| synth.set(\mix, ref.value)}),
+			SimpleController(cvs.amp).put(\value, {|ref| synth.set(\amp, ref.value)}),
+			SimpleController(cvs.lag).put(\value, {|ref| synth.set(\lag, ref.value)})
+		]);
 
 		forkIfNeeded{
 			server.bootSync;
@@ -56,6 +58,7 @@ RedAbstractMix {	//abstract class
 	lag_ {|val| cvs.lag.value_(val).changed(\value)}
 	free {
 		synth.free;
+		controllers.do{|x| x.remove};
 	}
 	gui {|parent, position|
 		^RedMixGUI(this, parent, position);

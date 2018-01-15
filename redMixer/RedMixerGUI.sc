@@ -1,141 +1,146 @@
 //redFrik
 
 //--related:
-//RedEffectsRackGUI
+//RedMixerChannelGUI RedEffectsRackGUI RedMatrixMixerGUI
 
 //--todo:
-//differentiate mixers and channels
+//differentiate mixers and channels more graphically
 //fix the rest of the presets
-//add eq buttons again to views?
-//peakRate box?
-//textviews at the bottom
+//textviews at the bottom for temporary notes
 //multiple channels (at least mono/stero)
-//disable views in later tab1 that i can't change (eg peak meters)
 //preview/monitor synth and connect to numbox
-//why not connected: lag and the rest of the redMixer.cvs does not save in preset load/save
 
 RedMixerGUI {
-	classvar <>numMixerChannelsBeforeScroll= 11;		//todo!!!
-	var <win, <redMixer, <time, lastTime= 0, mainGUI, mirrorGUI, mainGUImixer, mirrorGUImixer;
+	classvar <>numMixerChannelsBeforeScroll= 11;	//todo!!!
+	var <win, <redMixer, <time, lastTime= 0, controllers,
+	mainGUIchannels, mainGUImixers, mainGUIviews, mirrorGUIviews;
 	*new {|redMixer, position|
 		^super.new.initRedMixerGUI(redMixer, position);
 	}
 	initRedMixerGUI {|argRedMixer, position|
 		Routine({
 			var tab, winWidth, winHeight, tabWidth, tabHeight, topHeight,
-				macroMenu, macroFunctions,
-				margin= 4@4, gap= 4@4;
+			macroMenu, macroFunctions, makeMirror, defaults,
+			margin= Point(4, 4), gap= Point(4, 4), lagBox;
 			while({argRedMixer.isReady.not}, {0.02.wait});
-			
+			controllers= List.new;
+
 			redMixer= argRedMixer;
-			position= position ?? {300@200};
-			
-			tabWidth= RedMixerChannelGUI.width+gap.x*(redMixer.mixers.size+redMixer.channels.size);
-			topHeight= 14;
+			position= position ?? {Point(300, 200)};
+
+			tabWidth= RedMixerChannelGUI.width+gap.x;
+			tabWidth= tabWidth*(redMixer.mixers.size+redMixer.channels.size);
+			topHeight= 10;
 			tabHeight= RedMixerChannelGUI.height+2+topHeight;
-			
-			winWidth= tabWidth+(margin.x*2);	//perhaps clip here if only 2 channels or so
-			winHeight= tabHeight+topHeight+gap.y+(margin.y*2);
+
+			winWidth= (tabWidth+(margin.x*2)).max(260);
+			winHeight= tabHeight+topHeight+gap.y+(margin.y*2)+16;
 			win= Window(
 				redMixer.class.name.asString.put(0, $r),
 				Rect(position.x, position.y, winWidth, winHeight),
 				false
 			);
-			if(Main.versionAtMost(3, 4) and:{GUI.scheme!=\cocoa}, {
-				win.alpha= GUI.skins.redFrik.unfocus;
-			});
 			win.front;
 			win.view.background= GUI.skins.redFrik.background;
 			win.view.decorator= FlowLayout(win.view.bounds, margin, gap);
-			
-			//lagBox= RedNumberBox(win);
-			//redMixer.cvs.lag.connect(lagBox);
-			//win.view.decorator.shift(-2, 0);
-			//RedStaticText(win, "lag");
-			//win.view.decorator.shift(2, 0);
-			//peakRateBox= RedNumberBox(win);
-			//redMixer.cvs.peakRate.connect(peakRateBox);
-			//win.view.decorator.shift(-2, 0);
-			//RedStaticText(win, "peakRate");
-			//win.view.decorator.shift(2, 0);
-			RedButton(win, nil, "monitor", "monitor").action_{|view| "todo".postln};
+
+			lagBox= RedNumberBox(win)
+			.value_(redMixer.lag)
+			.action_({|v|
+				redMixer.lag= v.value.max(0);
+			});
+			controllers.add(
+				SimpleController(redMixer.cvs.lag).put(\value, {|ref|
+					lagBox.value= ref.value;
+				})
+			);
+			win.view.decorator.shift(-2, 2);
+			RedStaticText(win, nil, "lag");
+			win.view.decorator.shift(2, -2);
+			RedButton(win, nil, "monitor", "monitor").action_{|view| "todo".postln};  //TODO
 			RedNumberBox(win).value_(7).action_{|view| "todo".postln};
-			
+
 			macroFunctions= {|index|
 				var gui;
 				if(tab.activeTab==0, {
-					gui= mainGUI;
+					gui= mainGUIviews;
 				}, {
-					gui= mirrorGUI;
+					gui= mirrorGUIviews;
 				});
 				[
 					{},
-					{gui.do{|x| x.views.do{|y| y.value= y.cv.spec.unmap(y.cv.spec.default)}}},
-					{gui.do{|x| x.views.do{|y| y.value =1.0.rand}}},
-					{gui.do{|x| x.views.do{|y| if(0.3.coin, {y.value= 1.0.rand})}}},
-					{gui.do{|x| x.views.do{|y| y.value= y.value+0.08.rand2}}},
-					{gui.do{|x| x.views.do{|y| if(0.3.coin, {y.value= y.value+0.08.rand2})}}}
+					{gui.do{|x, i| x.do{|y, j| y.view.valueAction= defaults[i][j]}}},
+					{gui.do{|x| x.do{|y| y.view.valueAction= 1.0.rand}}},
+					{gui.do{|x| x.do{|y| if(0.3.coin, {y.view.valueAction= 1.0.rand})}}},
+					{gui.do{|x| x.do{|y| y.view.valueAction= y.view.value+0.08.rand2}}},
+					{gui.do{|x| x.do{|y| if(0.3.coin, {y.view.valueAction= y.view.value+0.08.rand2})}}},
 					//{gui.do{|x| x.valueEq= {|y, cv| cv.spec.unmap(cv.spec.default)}}},
 					//{gui.do{|x| x.valueEq= {1.0.rand}}},
 					//{gui.do{|x| x.valueEq= {|y| if(0.3.coin, {1.0.rand}, {y.value})}}},
 					//{gui.do{|x| x.valueEq= {|y| y.value+0.08.rand2}}},
 					//{gui.do{|x| x.valueEq= {|y| if(0.3.coin, {y.value+0.08.rand2}, {y.value})}}},
-					//{Dialog.savePanel{|x|
-					//	var arr= ([redMixer]++redMixer.channels++[redMixer.mixer]).collect{|x| x.cvs};
-					//	arr.writeArchive(x);
-					//}},
-					//{Dialog.getPaths{|x| x.do{|y|
-					//	var arr= ([redMixer]++redMixer.channels++[redMixer.mixer]).collect{|x| x.cvs};
-					//	Object.readArchive(y).do{|z, i|
-					//		z.keysValuesDo{|k, v| arr[i][k].value= v.value};
-					//	};
-					//}}}
+					{mainGUIviews.do{|x, i| x.do{|y, j| y.view.valueAction= mirrorGUIviews[i][j].view.value}}},
+					{mirrorGUIviews.do{|x, i| x.do{|y, j| y.view.valueAction= mainGUIviews[i][j].view.value}}},
+					{Dialog.savePanel{|x| redMixer.store(x)}},
+					{Dialog.openPanel{|x|
+						redMixer.free;
+						redMixer= RedMixer.restoreFile(x);
+						redMixer.init;
+						redMixer.gui(Point(win.bounds.left, win.bounds.top));
+						this.close;
+					}}
 				][index].value;
 			};
 			macroMenu= RedPopUpMenu(win)
-				.items_([
-					"_macros_",
-					"defaults",
-					"randomize all",
-					"randomize some",
-					"vary all",
-					"vary some"/*,
-					"eq: defaults",
-					"eq: randomize all",
-					"eq: randomize some",
-					"eq: vary all",
-					"eq: vary some",
-					"save preset",
-					"load preset"*/
-				])
-				.action_{|view| macroFunctions.value(view.value)};
-			RedButton(win, 14@14, "<").action= {macroFunctions.value(macroMenu.value)};
+			.items_([
+				"_macros_",
+				"defaults",
+				"randomize all",
+				"randomize some",
+				"vary all",
+				"vary some",
+				/*"eq: defaults",
+				"eq: randomize all",
+				"eq: randomize some",
+				"eq: vary all",
+				"eq: vary some",*/
+				"copy <",
+				"copy >",
+				"save preset",
+				"load preset"
+			])
+			.action_{|view|
+				macroFunctions.value(view.value);
+			};
+			RedButton(win, Point(14, 14), "<").action= {
+				macroFunctions.value(macroMenu.value);
+			};
 			win.view.decorator.nextLine;
-			
+
 			win.view.decorator.shift(100, 0);
 			time= RedSlider(win)
-				.action_{|view|
-					if(tab.activeTab==0, {
-						mainGUI.do{|x, i|
-							x.views.do{|y, j|
-								if(lastTime==0 and:{view.value>0}, {y.save});
-								y.interp(view.value, mirrorGUI[i].views[j].value);
-							};
-						};
-						tab.backgrounds= [
-							GUI.skins.redFrik.foreground.copy.alpha_(1-view.value),
-							GUI.skins.redFrik.background
-						];
-					}, {
-						view.value= 1;
+			.action_{|view|
+				if(tab.activeTab==0, {
+					if(lastTime==0 and:{view.value>0}, {
+						mainGUIviews.do{|x| x.do{|y| y.save}};
 					});
-					lastTime= view.value;
-				};
-			win.view.decorator.shift(-100, -16);
-			
+					mainGUIviews.do{|x, i|
+						x.do{|y, j|
+							y.interp(mirrorGUIviews[i][j].value, view.value);
+						};
+					};
+					tab.backgrounds_([
+						GUI.skins.redFrik.foreground.copy.alpha_(1-view.value),
+						GUI.skins.redFrik.background
+					]);
+				});
+				lastTime= view.value;
+			};
+			win.view.decorator.shift(-100, -4);
+
 			tab= TabbedView(
 				win,
-				tabWidth@tabHeight,
+				Point(tabWidth, tabHeight),
 				#[\now, \later],
 				[Color.grey(0.2, 0.2), GUI.skins.redFrik.background],
 				scroll: true
@@ -147,32 +152,70 @@ RedMixerGUI {
 			tab.backgrounds= [GUI.skins.redFrik.foreground, GUI.skins.redFrik.background];
 			tab.unfocusedColors= [Color.grey(0.2, 0.2), GUI.skins.redFrik.background];
 			tab.focusActions= [
-				{mainGUI.do{|x| x.views.do{|y| y.save}}; time.valueAction= 0},
-				{mirrorGUI.do{|x| x.views.do{|y| y.sync}}; time.value= 1}
+				{
+					time.valueAction= lastTime;
+					time.enabled= true;
+					time.canFocus= true;
+				},
+				{
+					mainGUIviews.do{|x| x.do{|y| y.save}};
+					time.value= 1;
+					time.enabled= false;
+					time.canFocus= false;
+				}
 			];
 			tab.views[0].flow{|v|
-				mainGUI= [];
-				mainGUI= mainGUI++redMixer.mixers.collect{|x, i|
-					RedMixerChannelGUI(x, v);
+				mainGUIchannels= redMixer.channels.collect{|x, i|
+					RedMixerChannelGUI(x, v, nil, "in[%,%]".format(x.out, x.out+1));
 				};
-				mainGUI= mainGUI++redMixer.channels.collect{|x, i|
-					RedMixerChannelGUI(x, v);
+				mainGUImixers= redMixer.mixers.collect{|x, i|
+					RedMixerChannelGUI(x, v, nil, "out[%,%]".format(x.out, x.out+1));
 				};
+			};
+			mainGUIviews= (mainGUIchannels++mainGUImixers).collect{|x| x.views};
+			defaults= mainGUIviews.collect{|x| x.collect{|y| y.view.value}};
+			makeMirror= {|v, x|
+				var views= List.new;
+				var cmp= CompositeView(v, x.cmp.bounds);
+				var ampRef= x.redMixerChannel.cvs.amp;	//special case to keep this link
+				var ampRefCopy= ampRef.copy;
+				x.views.do{|y|
+					var r;
+					if(y.ref==ampRef, {
+						r= ampRefCopy;
+					}, {
+						r= y.ref.copy;
+					});
+					views.add(y.class.new(cmp, y.view.bounds, r, y.map, y.unmap, y.args));
+				};
+				views;
 			};
 			tab.views[1].flow{|v|
-				mirrorGUI= [];
-				mirrorGUI= mirrorGUI++redMixer.mixers.collect{|x, i|
-					RedMixerChannelGUI.newMirror(x, v);
-				};
-				mirrorGUI= mirrorGUI++redMixer.channels.collect{|x, i|
-					RedMixerChannelGUI.newMirror(x, v);
+				mirrorGUIviews= (mainGUIchannels++mainGUImixers).collect{|x|
+					makeMirror.value(v, x);
 				};
 			};
-			
-			CmdPeriod.doOnce({if(win.isClosed.not, {win.close})});
+			redMixer.channels.do{|x, i|
+				controllers.add(
+					SimpleController(x.cvs.out).put(\value, {|ref|
+						mainGUIchannels[i].text_("in[%,%]".format(ref.value, ref.value+1));
+					})
+				);
+			};
+			redMixer.mixers.do{|x, i|
+				controllers.add(
+					SimpleController(x.cvs.out).put(\value, {|ref|
+						mainGUImixers[i].text_("out[%,%]".format(ref.value, ref.value+1));
+					})
+				);
+			};
+
+			win.onClose_({controllers.do{|x| x.remove}});
+			CmdPeriod.doOnce({this.close});
 		}).play(AppClock);
 	}
 	close {
 		if(win.isClosed.not, {win.close});
+		controllers.do{|x| x.remove};
 	}
 }

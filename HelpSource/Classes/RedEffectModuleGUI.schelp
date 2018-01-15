@@ -4,9 +4,7 @@ CATEGORIES:: Red>redModule
 RELATED:: Classes/RedEffectModule, Classes/RedInstrumentModuleGUI
 
 DESCRIPTION::
-NOTE::
-Requires link::Classes/Conductor:: quark.
-::
+A standardized gui for link::Classes/RedEffectModule::s.
 
 CLASSMETHODS::
 
@@ -21,9 +19,6 @@ A link::Classes/Window::, link::Classes/CompositeView:: or code::nil::.
 ARGUMENT:: position
 A link::Classes/Point:: or code::nil::.
 
-METHOD:: newMirror
-Does not connect sliders and knobs to link::Classes/CV::s. For now/later functionality in effect rack gui.
-
 INSTANCEMETHODS::
 
 PRIVATE:: prContainer, initRedEffectModuleGUI
@@ -31,56 +26,53 @@ PRIVATE:: prContainer, initRedEffectModuleGUI
 METHOD:: close
 Check if a window was created as parent and then closes it.
 
-METHOD:: mirror
-A link::Classes/Boolean::.
-
 EXAMPLES::
 
 CODE::
-s.boot
 a= RedEfxVerb.new;
-b= RedEffectModuleGUI(a);
-b.redEffectModule==a
-b.parent
-b.views
-b.mirror
-a.cvs.verbMix.input= 0.3;
-b.close
-a.free
+c= {SinOsc.ar([400, 404], 0, 0.5*Decay.kr(Dust.kr(1)))}.play;
+g= RedEffectModuleGUI(a);
+g.redEffectModule==a;
+g.parent;
+g.views;
+a.verbMix= 0.5;
+a.verbRoom= 0.9;
+g.close;
+a.free;
+c.free;
 
-//--
-RedEfxTape.new.gui
+a= RedEfxTape(0);
+b= a.gui;
+c= a.gui(nil, Point(100, 200));
+a.tapeMix= 0;
+a.tapeFB= 0.75
+a.free;
+b.close;
+c.close;
 
-//--
-a= RedEfxGuit.new;
-b= RedEffectModuleGUI(a);
-c= RedEffectModuleGUI.newMirror(a);
-a.cvs.guitCenter.input= 0.6;
-c.views[1].value= 0.3
-b.close; c.close;
-a.free
-
-//--
 (
 var efx= [RedEfxRing.new, RedEfxDist.new, RedEfxTank.new, RedEfxGuit.new];
 var win= Window("test", Rect(100, 200, 300, 400));
 win.front;
 win.view.decorator= FlowLayout(win.view.bounds);
+Pbind(\degree, 0).play;
 efx.do{|x|
-	RedEffectModuleGUI(x, win, Point(0, 0), true);
+	RedEffectModuleGUI(x, win);
 };
-CmdPeriod.doOnce({if(win.isClosed.not, {win.close})});
+CmdPeriod.doOnce({win.close});
 )
 
-//--
 (
-w= Window("hgf", Rect(100, 200, 500, 500));
-w.front;
-v= CompositeView(w, Rect(10, 10, 400, 400)).background_(Color.blue).decorator= FlowLayout(Rect(0, 0, 300, 300));
-a= RedEfxGuit.new;
+var efx= RedEfxTank.new;
+var win= Window("hgf", Rect(100, 200, 500, 500));
+win.front;
+v= CompositeView(win, Rect(10, 10, 400, 400));
+v.background_(Color.blue);
+v.decorator= FlowLayout(Rect(0, 0, 300, 300));
 Pbind(\degree, 0).play;
-a.gui(v);
+efx.gui(v);
 v.decorator.nextLine;
-a.gui(v);
+efx.gui(v);
+CmdPeriod.doOnce({win.close});
 )
 ::

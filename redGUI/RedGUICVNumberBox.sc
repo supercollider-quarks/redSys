@@ -1,11 +1,11 @@
 //redFrik
 
-RedGUICVSlider : RedGUICV {
-	classvar <defaultWidth= 16, <defaultHeight= 74;
+RedGUICVNumberBox : RedGUICV {
+	classvar <defaultWidth= 40, <defaultHeight= 14;
 
 	//--private
 	prMake {|parent, bounds|
 		bounds= (bounds ?? {Rect(0, 0, defaultWidth, defaultHeight)}).asRect;
-		^RedSlider(parent, bounds);
+		^RedNumberBox(parent, bounds);
 	}
 }

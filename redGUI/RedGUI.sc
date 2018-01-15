@@ -25,13 +25,13 @@ Red2DSlider {
 	}
 }
 RedButton {
-	*new {|parent, bounds ...str|
+	*new {|parent, bounds ...strings|
 		var fnt= RedFont.new;
-		if(str.isEmpty, {str= [""]});
-		bounds= bounds ?? {Point(str.maxValue{|x| x.bounds(fnt).width}+14, 14)};
+		if(strings.isEmpty, {strings= [""]});
+		bounds= bounds ?? {Point(strings.maxValue{|x| x.bounds(fnt).width}+14, 14)};
 		^Button(parent, bounds)
 		.states_(
-			str.collect{|x, i|
+			strings.collect{|x, i|
 				var cols= [GUI.skins.redFrik.foreground, GUI.skins.redFrik.background];
 				[x, cols.wrapAt(i), cols.wrapAt(i+1)];
 			}
@@ -60,7 +60,7 @@ RedLevelIndicator {
 	*new {|parent, bounds|
 		bounds= bounds ?? {Point(100, 14)};
 		^LevelIndicator(parent, bounds)
-		.style_(1)
+		.background_(GUI.skins.redFrik.background)
 	}
 }
 RedMultiSliderView {
@@ -109,8 +109,10 @@ RedSlider {
 	}
 }
 RedStaticText {
-	*new {|parent, string, bounds|
+	*new {|parent, bounds, string|
 		var fnt= RedFont.new;
+		string= string ?? {""};
+		string= string.asString;
 		bounds= bounds ?? {string.bounds(fnt)};
 		^StaticText(parent, bounds)
 		.string_(string)

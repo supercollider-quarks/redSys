@@ -8,68 +8,85 @@
 
 RedEffectsRack {
 	classvar <>defaultClasses;
-	var <group, <cvs, <isReady= false, groupPassedIn,
-		<efxs;
+	var <group, <cvs, <specs, <isReady= false, groupPassedIn,
+	<efxs, controllers;
 	*new {|efxClasses, out= 0, group|
 		^super.new.initRedEffectsRack(efxClasses, out, group);
 	}
 	*initClass {
-		defaultClasses= [RedEfxRing, RedEfxTape, RedEfxComb, RedEfxDist, RedEfxTank, RedEfxComp];
+		defaultClasses= [	//just some favourites
+			RedEfxRing,
+			RedEfxTape,
+			RedEfxComb,
+			RedEfxDist,
+			RedEfxTank,
+			RedEfxComp
+		];
 	}
 	initRedEffectsRack {|efxClasses, argOut, argGroup|
 		var server;
 		if(efxClasses.isNil or:{efxClasses.isEmpty}, {
-			(this.class.name++": efxClasses argument empty so using the default classes").inform;
+			(this.class.name++": efxClasses empty so using the default classes").inform;
 			efxClasses= defaultClasses;
 		});
-		
-		if(argGroup.notNil, {
-			server= argGroup.server;
-			groupPassedIn= true;
-		}, {
+		if(argGroup.isNil, {
 			server= Server.default;
 			groupPassedIn= false;
+		}, {
+			server= argGroup.server;
+			groupPassedIn= true;
 		});
-		
 		forkIfNeeded{
-			if(groupPassedIn.not, {					//boot server and create group
+			if(groupPassedIn.not, {	//boot server and create group
 				server.bootSync;
 				group= Group.after(server.defaultGroup);
 				server.sync;
-				CmdPeriod.doOnce({group.free});
 			}, {
 				group= argGroup;
 			});
-			
+
 			//--create efxs
 			efxs= efxClasses.collect{|x| x.new(argOut, group)};
-			
+
 			//--one bus that controlls them all
-			cvs= (
-				\out: CV.new.sp(argOut, 0, server.options.numAudioBusChannels-1, 1, \lin)
+			cvs= ();
+			specs= (out: \audiobus.asSpec);
+			controllers= List.new;
+			cvs.out= Ref(specs.out.default);
+			controllers.add(
+				SimpleController(cvs.out).put(\value, {|ref|
+					efxs.do{|x| x.out= ref.value};
+				})
 			);
-			cvs.out.action= {|cv| efxs.do{|x| x.cvFromControlName(\out).value= cv.value}};
-			
+
 			//--add all efx cvs to this cvs
 			efxs.do{|x|
 				x.cvs.keysValuesDo{|k, v|
-					var suffix= 1;
-					if(v!=x.cvFromControlName(\out), {//skip bus cvs. controlled by the one
-						
+					var suffix= 1, ks, spec;
+					if(k!=\out, {
+						spec= x.specs[x.cvsToParam(k)];
 						//--add suffix if >1 of the same efx class
-						if(cvs.at(k).notNil, {
+						if(cvs[k].notNil, {	//duplicates
+							ks= k.asString;
 							cvs.keysValuesDo{|kk, vv|
-								if(kk.asString.contains(k.asString), {
-									if(suffix<=kk.asString.split($_).last.asInteger, {
-										suffix= kk.asString.split($_).last.asInteger+1;
+								kk= kk.asString;
+								if(kk.contains(ks), {
+									if(suffix<=kk.split($_).last.asInteger, {
+										suffix= kk.split($_).last.asInteger+1;
 									});
 								});
 							};
-							(this.class.name++": added suffix _"++suffix+"to cvs key"+k).inform;
-							cvs.put(k++"_"++suffix, v);
-						}, {
-							cvs.put(k, v);
+							k= (k++"_"++suffix).asSymbol;
 						});
+						cvs.put(k, v);
+						this.addUniqueMethod((k++"_").asSymbol, {|obj, val|
+							cvs[k].value_(spec.constrain(val)).changed(\value);
+							this;
+						});
+						this.addUniqueMethod(k, {|obj|
+							cvs[k].value;
+						});
+
 					});
 				};
 			};
@@ -77,32 +94,17 @@ RedEffectsRack {
 		};
 	}
 	free {
+		controllers.do{|x| x.remove};
 		efxs.do{|x| x.free};
 		if(groupPassedIn.not, {group.free});
 	}
-	out {
-		^cvs.out;
+	out_ {|val|
+		cvs.out.value_(specs.out.constrain(val)).changed(\value);
 	}
-	defaults {
-		cvs.do{|cv| cv.value= cv.spec.default};
+	out {
+		^cvs.out.value;
 	}
 	gui {|position|	//parent here???
 		^RedEffectsRackGUI(this, position);
 	}
-	makeView {|parent|
-		//todo
-		//^RedEffectsRackGUI.view(this)?? embed in view later
-	}
 }
-/*
-a= RedEffectsRack([RedEfxTank, RedEfxRing, RedEfxDist, RedEfxComb])
-Pbind(\degree, Pseq([0, 0, 5, 4, 5, 6], inf)).play
-a.efxs.do{|x| x.cvs.out.value.postln};""
-a.cvs.out.value= 1
-a.cvs
-a.efxs
-a.cvs.ringMix.input= 0.5
-a.cvs.tankMix.input= 0.5
-a.defaults
-
-*/

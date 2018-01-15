@@ -5,7 +5,7 @@ RELATED:: Classes/RedMixer, Classes/RedEffectsRackGUI
 
 DESCRIPTION::
 NOTE::
-Requires link::Classes/Conductor:: quark.
+Requires the link::Classes/TabbedView:: quark.
 ::
 
 CLASSMETHODS::
@@ -31,11 +31,11 @@ Slider to go from now to later.
 EXAMPLES::
 
 CODE::
-a= RedMixer();
+a= RedMixer(#[20, 40, 60, 80]);
 c= RedMixerGUI(a);
-b= Pbind(\degree, Pseq([0, 5, 6, 3, 2, 1], inf), \out, Pseq([2, 4, 6, 8], inf)).play;
-a.channels[1].cvs.vol.input= 1.0.rand;
-a.channels[2].cvs.bal.input= 1.0.rand;
+b= Pbind(\degree, Pseq([0, 5, 6, 3, 2, 1], inf), \out, Pseq([20, 40, 60, 80], inf)).play;
+a.channels[1].vol= -12;
+a.channels[2].bal= -0.4;
 c.close;
 b.stop;
 a.free;

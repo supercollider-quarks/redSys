@@ -3,6 +3,11 @@ SUMMARY:: gui for RedMatrixMixer
 CATEGORIES:: Red>redMatrixMixer
 RELATED:: Classes/RedMatrixMixer, Classes/RedEffectsRackGUI, Classes/RedMixerGUI
 
+DESCRIPTION::
+NOTE::
+Requires the link::Classes/TabbedView:: quark.
+::
+
 CLASSMETHODS::
 
 METHOD:: new
@@ -37,7 +42,14 @@ SynthDef(\redMatrixMixerTest, {|out= 0, freq= 400, gate= 1, amp= 0.1|
 	Out.ar(out, z*e);
 }).add;
 )
-b= Pbind(\instrument, \redMatrixMixerTest, \degree, Pseq([0, 1, 5, 4], inf), \dur, 0.25, \out, Pseq((0..7), inf)).play;
+(
+b= Pbind(
+	\instrument, \redMatrixMixerTest,
+	\degree, Pseq([0, 1, 5, 4], inf),
+	\dur, 0.25,
+	\out, Pseq((0..7), inf)
+).play;
+)
 
 (
 Routine({

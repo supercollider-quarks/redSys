@@ -1,12 +1,14 @@
 //redFrik
 
+//unfinished and untested
+
 RedInstrumentModuleGUI {
 	var <win;
 	*new {
 		^super.new.initRedInstrumentGUI;
 	}
 	initRedInstrumentGUI {
-		
+
 	}
 	defaults {
 		RedInstrumentModule.all.do{|x|

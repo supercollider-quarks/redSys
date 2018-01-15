@@ -5,7 +5,7 @@ RELATED:: Classes/RedEffectsRack, Classes/RedMatrixMixerGUI, Classes/RedMixerGUI
 
 DESCRIPTION::
 NOTE::
-Requires the link::Classes/Conductor:: and the link::Classes/TabbedView:: quarks.
+Requires the link::Classes/TabbedView:: quark.
 ::
 
 CLASSMETHODS::
@@ -19,7 +19,7 @@ ARGUMENT:: position
 A link::Classes/Point::.
 
 METHOD:: numEffectsBeforeScroll
-The number of link::Classes/RedEffectModuleGUI:: to fit before adding a vertical scroller. The default is 9. This fits well with a screensize of 1440x900. For smaller screens use a lower value.
+The number of link::Classes/RedEffectModuleGUI:: to fit before adding a vertical scroller. The default is 9. For smaller screens use a lower value.
 
 INSTANCEMETHODS::
 
@@ -37,28 +37,28 @@ CODE::
 a= RedEffectsRack();
 b= Pbind(\degree, Pseq([0, 1, 5, 4, 3, 4], inf), \dur, 0.25).play;
 c= RedEffectsRackGUI(a);
-a.cvs.ringMix.value_(0.5);
+a.ringMix= 0.5;
 a.free;
 b.stop;
 c.close;
 
-//--
-a= RedEffectsRack([RedEfxRing, RedEfxGuit, RedEfxVerb, RedEfxRing]);
+a= RedEffectsRack([RedEfxRing, RedEfxDelp, RedEfxGuit, RedEfxVerb, RedEfxRing]);
 b= Pbind(\degree, Pseq([0, 1, 5, 4, 3, 4], inf), \dur, 0.25).play;
-c= RedEffectsRackGUI(a);
+c= RedEffectsRackGUI(a, Point(10, 300));
 c.redEffectsRack.efxs;
-a.cvs.verbMix.value= 0.5;
-a.cvs.verbDamp.value= 0.7;
+a.verbMix= 0.75;
+a.verbDamp= 0.7;
 a.free;
 b.stop;
 c.close;
 
-//--
+s.options.memSize= 8192*2;
+s.reboot;
 a= RedEffectsRack(RedEffectModule.subclasses);
 b= Pbind(\degree, Pseq([0, 1, 5, 4, 3, 4], inf), \dur, 0.25).play;
 c= RedEffectsRackGUI(a);
 c.redEffectsRack.efxs;
-a.cvs.verbMix.value= 0.5;
+a.verbMix= 0.5;
 a.free;
 b.stop;
 c.close;

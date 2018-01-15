@@ -6,7 +6,7 @@
 RedMatrixMixer {
 	var <group,
 	<isReady= false, groupPassedIn,
-	<nIn, <nOut, <synth, <cvs, <defString;
+	<nIn, <nOut, <synth, <cvs, <defString, controllers;
 	*new {|nIn= 8, nOut= 8, in= 0, out= 0, group, lag= 0.05|
 		^super.new.initRedMatrixMixer(nIn, nOut, in, out, group, lag);
 	}
@@ -28,10 +28,11 @@ RedMatrixMixer {
 			out: Ref(argOut),
 			lag: Ref(argLag)
 		);
-		SimpleController(cvs.in).put(\value, {|ref| synth.set(\in, ref.value)});
-		SimpleController(cvs.out).put(\value, {|ref| synth.set(\out, ref.value)});
-		SimpleController(cvs.lag).put(\value, {|ref| synth.set(\lag, ref.value)});
-
+		controllers= List.newFrom([
+			SimpleController(cvs.in).put(\value, {|ref| synth.set(\in, ref.value)}),
+			SimpleController(cvs.out).put(\value, {|ref| synth.set(\out, ref.value)}),
+			SimpleController(cvs.lag).put(\value, {|ref| synth.set(\lag, ref.value)})
+		]);
 		forkIfNeeded{
 			if(groupPassedIn.not, {
 				server.bootSync;
@@ -53,6 +54,7 @@ RedMatrixMixer {
 				var setName= ("o"++i++"_").asSymbol;
 				this.addUniqueMethod(setName, {|mixer, arr|
 					cvs[name].value_(arr).changed(\value);
+					this;
 				});
 				this.addUniqueMethod(name, {|mixer|
 					cvs[name].value;
@@ -60,10 +62,12 @@ RedMatrixMixer {
 				arr= 0.dup(nIn);
 				if(i<nIn, {arr= arr.put(i, 1)});
 				cvs[name]= Ref(arr);
-				SimpleController(cvs[name]).put(\value, {|ref|
-					synth.set(name, ref.value);
-					ref.changed;
-				});
+				controllers.add(
+					SimpleController(cvs[name]).put(\value, {|ref|
+						synth.set(name, ref.value);
+						ref.changed;
+					})
+				);
 			};
 			server.sync;
 			isReady= true;
@@ -83,17 +87,18 @@ RedMatrixMixer {
 		^defString.interpret;
 	}
 	in {^cvs.in.value}
-	in_ {|val| cvs.in.value_(val).changed(\value)}
+	in_ {|val| cvs.in.value_(val.max(0)).changed(\value)}
 	out {^cvs.out.value}
-	out_ {|val| cvs.out.value_(val).changed(\value)}
+	out_ {|val| cvs.out.value_(val.max(0)).changed(\value)}
 	lag {^cvs.lag.value}
-	lag_ {|val| cvs.lag.value_(val).changed(\value)}
+	lag_ {|val| cvs.lag.value_(val.max(0)).changed(\value)}
 	free {
 		if(groupPassedIn.not, {
 			group.free;
 		}, {
 			synth.free;
 		});
+		controllers.do{|x| x.remove};
 	}
 	gui {|position|
 		^RedMatrixMixerGUI(this, position);

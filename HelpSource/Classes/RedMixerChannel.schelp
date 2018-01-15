@@ -4,16 +4,14 @@ CATEGORIES:: Red>redMixer
 RELATED:: Classes/RedMixerChannelGUI, Classes/RedMixer, Classes/RedMixerGUI, Classes/RedEffectModule
 
 DESCRIPTION::
-NOTE::
-Requires link::Classes/Conductor:: quark.
-::
+Represents a channel on a mixing desk. volume, panning, eq, mute, inserts, level meters etc. Can be used on its own but more often inside of a link::Classes/RedMixer::.
 
 CLASSMETHODS::
 
 METHOD:: new
 
-ARGUMENT:: outputChannels
-An array.
+ARGUMENT:: out
+Channel index for stereo bus.
 
 ARGUMENT:: group
 If code::nil:: then code::Server.default.defaultGroup:: will be used.
@@ -21,12 +19,34 @@ If code::nil:: then code::Server.default.defaultGroup:: will be used.
 ARGUMENT:: lag
 For eq settings, balance and volume. In seconds.
 
+METHOD::restoreFile
+Reads back a redMixerChannel with all settings from an archived instance. Also see LINK::#-store::.
+
+NOTE::
+Call code::.init:: after this to initialize server side objects.
+::
+
+ARGUMENT::path
+A file path as a string.
+
 INSTANCEMETHODS::
 
-PRIVATE:: prEqAction, initRedMixerChannel
+PRIVATE:: initRedMixerChannel, prEqAction
 
-METHOD:: mute
-True sets the volume to zero. false recalls the volume.
+METHOD:: group
+The link::Classes/Group:: in use.
+
+METHOD:: out
+Get or set current bus.
+
+METHOD:: interp
+Blend in values from another channel. Ignores out, mute, peaks and levels.
+
+ARGUMENT:: other
+Another link::Classes/RedMixerChannel:: instance.
+
+ARGUMENT:: val
+Blend fraction 0.0-1.0
 
 METHOD:: insertClass
 Creates a new link::Classes/RedEffectModule:: before the equalizer.
@@ -38,7 +58,7 @@ ARGUMENT:: addAction
 Local to the inserts. The default code::\addToHead:: will put it first in the chain of inserts.
 
 METHOD:: insert
-Adds a link::Classes/RedEffectModule:: before the equalizer.
+Adds a link::Classes/RedEffectModule:: instance before the equalizer.
 
 NOTE::
 You can not do code::.insert(RedEfxRing.new):: without a fork.
@@ -49,6 +69,9 @@ An instance or an array of instances.
 
 ARGUMENT:: addAction
 Local to the inserts. The default code::\addToHead:: will put it first in the chain of inserts.
+
+METHOD:: inserts
+List of current inserts.
 
 METHOD:: removeClass
 
@@ -63,20 +86,23 @@ Free and remove this link::Classes/RedEffectModule::. Can also be an array.
 METHOD:: removeAll
 Free and remove all effects in one go.
 
-METHOD:: defaults
-Revert all link::Classes/CV::s to their defaults.
-
-METHOD:: out
-Get or set current bus.
-
 METHOD:: gui
 Create a link::Classes/RedMixerChannelGUI::.
 
 METHOD:: free
-Free synth, equalizer, inserts and remove oscreponder.
+Free synth, equalizer and inserts.
 
-METHOD:: resetPeaked
-Set code::cvs.peaked0:: and code::cvs.peaked1:: to 0.
+METHOD:: lag
+Lag for this channel. Also for any equalizer parameters.
+
+ARGUMENT:: val
+Time in seconds.
+
+METHOD:: mute
+Mute the input sound. Post level meter.
+
+ARGUMENT:: val
+An link::Classes/Integer:: where 1 is muted and 0 unmuted.
 
 METHOD:: def
 Returns the mixer channel link::Classes/SynthDef::.
@@ -84,107 +110,164 @@ Returns the mixer channel link::Classes/SynthDef::.
 METHOD:: defEq
 Returns the equalizer link::Classes/SynthDef::.
 
-METHOD:: group
-The link::Classes/Group:: in use.
+METHOD::store
+Saves an instance as an archive to disk. All settings and effect inserts are stored. Also see LINK::#*restoreFile::.
+
+ARGUMENT::path
+A file path as a string.
+
+METHOD:: peaks
+Array of current amplitudes.
+
+METHOD:: peaks
+Array with maximum amplitudes. Clear with link::#-resetPeaks::.
+
+METHOD:: resetPeaks
+Set the all values in code::peaks:: to 0.
 
 METHOD:: cvs
-Dictionary of link::Classes/CV::s:
+Dictionary with all link::Classes/Ref:: objects. (used to be CV objects)
 
 TABLE::
-## out || 
-## lag || 
-## eqHi || 
-## eqMi || 
-## eqLo || 
-## hiFreq || 
-## hiBand || 
-## hiGain || 
-## miFreq || 
-## miBand || 
-## miGain || 
-## loFreq || 
-## loBand || 
-## loGain || 
-## bal || 
-## vol || 
-## peak0 || 
-## peak1 || 
-## peaked0 || 
-## peaked1 || 
+## levels || array of amplitudes
+## peaks || array of max amplitudes
+## out || output bus offset
+## lag || ramp time in seconds for eq settings, balance and volume
+## mute || silence output
+## amp || volume
+## bal || stereo balance -1 to 1
+## eqHi || enable highpass 0 / 1
+## eqMi || enable bandpass 0 / 1
+## eqLo || enable lowpass 0 / 1
+## hiFreq ||
+## hiBand ||
+## hiGain ||
+## miFreq ||
+## miBand ||
+## miGain ||
+## loFreq ||
+## loBand ||
+## loGain ||
 ::
-
-METHOD:: inserts
-Array of current inserts.
-
-METHOD:: args
-Array of arguments sent to the mixer channel synth.
 
 EXAMPLES::
 
 CODE::
-a= RedMixerChannel(#[0, 1]);
-b= Pbind(\pan, Pseq([-1, 1], inf), \amp, 0.5).play
-a.cvs.vol.value= -9
-a.out= 1
-a.out= 0
-a.cvs.vol.value= 0
-a.cvs.lag.value= 1
-a.cvs.bal.value= -0.9
-a.cvs.bal.value= 0.9
-a.cvs.peak0.value
-a.cvs.peak1.value
+s.boot;
+s.meter;
+s.plotTree;
 
-a.cvs.vol.value= 18
-a.cvs.peaked0.value
-a.cvs.peaked1.value
-a.cvs.vol.value= -9
-a.resetPeaked
-a.cvs.peaked0.value
-a.cvs.peaked1.value
+a= RedMixerChannel(0);
+b= Pbind(\pan, Pseq([-1, 1], inf), \dur, 0.5, \amp, 0.5).play;
+a.vol= -9
+a.out= 20	//this will move and the (internal ReplaceOut) the mixerchannel to bus 20
+a.out= 0	//move it back
+a.lag= 1	//fade time in seconds (applies to volume, balance and all eq settings)
+a.vol= 0
+a.bal= -0.9
+a.bal= 0.9
+a.bal= 0
+a.levels	//current amplitudes
+a.peaks	//max amplitudes
+a.resetPeaks	//reset max amplitudes to 0
+a.mute= 1
+a.mute= 0
 a.free
 b.stop
 
-//--
-a= RedMixerChannel(#[0, 1]);
-b= {Pan2.ar(WhiteNoise.ar(LFNoise2.kr(4).abs), LFNoise2.kr(2))}.play
-a.cvs.vol.value= -12
-a.cvs.eqHi.value= 1
-a.cvs.hiFreq.value= 9000
-a.cvs.hiBand.input= 0.3
-a.cvs.hiGain.input= 0.7
-a.cvs.eqHi.value= 0
-a.cvs.eqMi.value= 1
-a.cvs.miFreq.value= 1500
-a.cvs.miBand.input= 0.2
-a.cvs.miGain.input= 0.9
-a.cvs.eqMi.value= 0
-a.cvs.eqLo.value= 1
-a.cvs.loFreq.value= 500
-a.cvs.loBand.input= 0.3
-a.cvs.loGain.input= 0.7
-a.cvs.eqLo.value= 0
-a.free
+//--equalizer
+a= RedMixerChannel();
+a.vol= -9
+b= {Pan2.ar(WhiteNoise.ar(0.5), 0)}.play;
+a.eqHi= 1
+a.hiFreq= 9000
+a.hiBand= 0.5
+a.hiGain= -20	//-20db
+a.lag= 3
+a.hiGain= 0	//slowly fade back to 0db
+a.eqHi= 0	//as no eq active the synth will be removed
+a.eqMi= 1	//recreates the eq synth
+a.miFreq= 2000
+a.miBand= 0.2
+a.miGain= 20
+a.eqLo= 1
+a.loFreq= 300
+a.loBand= 0.1
+a.loGain= 6
+a.eqMi= 0
+a.eqLo= 0
+a.free	//remove the channel and play sound straight though (loud)
 b.free
 
-//--
-a= RedMixerChannel(#[0, 1]);
-b= {Pan2.ar(WhiteNoise.ar(LFNoise2.kr(4).abs), LFNoise2.kr(2))}.play
-c= RedEfxVerb.new
-a.insert(c)
-a.inserts[0].cvs.verbMix.input= 0.5
-a.insertClass([RedEfxBitc, RedEfxDist])
-a.inserts
-a.remove(c)
-a.inserts
-a.insertClass(RedEfxRing, \addToTail)
-a.inserts.last.cvs.ringMix.input= 0.5
-a.inserts
-a.removeClass(RedEfxRing)
-a.inserts
-a.removeAll
-a.inserts
-a.mute(true)
-a.mute(false)
+//--inserts
+s.plotTree;
+g= Group(s);
+a= RedMixerChannel(0, g);
+b= {Pan2.ar(WhiteNoise.ar(LFNoise1.kr(4)*0.5), LFNoise1.kr(2))}.play;
+c= RedEfxTank.new;
+a.insert(c);
+a.inserts[0].tankMix= 0;
+a.insertClass([RedEfxBitc, RedEfxDist]);
+a.inserts;
+a.out= 1;
+a.inserts[0].out;
+a.out= 0
+a.remove(c);
+a.inserts;
+a.insertClass(RedEfxRing, \addToHead);
+a.insertClass(RedEfxVerb, \addToTail);
+a.inserts.last.verbMix= 0.5;
+a.inserts.first.ringMix= 1;
+a.inserts.first.ringFreq= 0.5;
+a.inserts;
+a.removeClass(RedEfxVerb);
+a.inserts;
+a.removeAll;
+a.inserts;
+a.free;
+b.free;
+g.free;
+
+//--interpolate
+s.options.numOutputBusChannels= 8; s.reboot;
+s.meter
+a= RedMixerChannel(0);
+b= RedMixerChannel(2);
+c= Pbind(\degree, Pseq([0, 1], inf), \dur, 0.5, \amp, 0.5, \out, Pseq([0, 2], inf)).play;
+b.bal= -0.75
+b.lag= 0.8
+b.vol= -30
+a.interp(b, 0.5)
+a.bal
+a.lag
+a.vol
 a.free
+b.free
+c.stop
+
+//--archive
+a= RedMixerChannel();
+b= {Pan2.ar(WhiteNoise.ar(0.5), 0)}.play;
+a.lag= 2;
+a.vol= -9;
+a.eqMi= 1;
+a.miGain= -20;
+a.insertClass(RedEfxRing);
+a.insertClass(RedEfxVerb, \addToTail);
+a.inserts[0].ringMix= 1;
+a.inserts[0].ringFreq= 20;
+a.store("~/Desktop/redMixerChannel-test.txt".standardizePath)	//same as .writeArchive, ignore the warnings
+//recompile
+a= RedMixerChannel.restoreFile("~/Desktop/redMixerChannel-test.txt".standardizePath);
+a.init
+a.lag	//should be 2
+a.vol	//shoud be -9
+a.eqMi	//should be 1
+a.miGain	//should be -20
+a.inserts[0].ringMix
+a.inserts[0].ringFreq
+b= {Pan2.ar(WhiteNoise.ar(0.5), 0)}.play;	//get the same sound back
+a.inserts	//should contain a RedEfxRing
+a.free	//remove the channel and play sound straight though (loud)
 b.free
 ::
