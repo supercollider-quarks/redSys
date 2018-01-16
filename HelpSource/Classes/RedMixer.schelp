@@ -203,8 +203,8 @@ b= Pbind(\out, Pseq([20, 30, 40], inf), \degree, Pseq([0, 1, 2], inf), \amp, 0.7
 a.solo_(0)	//solo first channel
 a.solo_(2)	//solo last channel
 a.solo_([1, 2])	//can also be an array
-a.mute= 0	//unmute all
 a.mute= 1	//mute all
+a.mute= 0	//unmute all
 a.free
 b.stop
 

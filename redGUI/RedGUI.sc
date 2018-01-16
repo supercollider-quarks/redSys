@@ -5,14 +5,16 @@
 RedGUI {
 	*initClass {
 		StartUp.add({
-			GUI.skins.put(\redFrik, (
-				background: Color.red.alpha_(0.8),
-				foreground: Color.black,
-				selection: Color.grey,
-				unfocus: 0.9,
-				fontSpecs: ["Monaco", 9],
-				offset: Point(0, 0)
-			));
+			if(\GUI.asClass.notNil, {
+				GUI.skins.put(\redFrik, (
+					background: Color.red.alpha_(0.8),
+					foreground: Color.black,
+					selection: Color.grey,
+					unfocus: 0.9,
+					fontSpecs: ["Monaco", 9],
+					offset: Point(0, 0)
+				));
+			});
 		});
 	}
 }
