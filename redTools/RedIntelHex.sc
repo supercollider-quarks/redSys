@@ -92,6 +92,6 @@ RedIntelHex {
 		});
 	}
 	prHexStrToInt {|str|
-		^str.sum{|chr, i| chr.digit*(16**(str.size-1-i))}
+		^str.sum{|chr, i| chr.digit*(16**(str.size-1-i))}.asInteger;
 	}
 }
