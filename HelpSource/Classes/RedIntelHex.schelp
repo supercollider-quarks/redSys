@@ -16,7 +16,7 @@ Path to file as a link::Classes/String::.
 
 INSTANCEMETHODS::
 
-PRIVATE::prRead
+PRIVATE::prRead, prHexStrToInt
 
 METHOD::read
 Read and decode a .hex file.

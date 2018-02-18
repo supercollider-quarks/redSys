@@ -17,7 +17,7 @@ RedIntelHex {
 		};
 		^str;
 	}
-	
+
 	*read {|path|
 		^super.new.read(path);
 	}
@@ -29,7 +29,7 @@ RedIntelHex {
 			(this.class.name++": file"+path+"not found").error;
 		});
 	}
-	
+
 	//--private
 	prRead {|path|
 		var f= File(path, "r");
@@ -38,48 +38,48 @@ RedIntelHex {
 		var eof= false;
 		var line;
 		array= [];
-		
+
 		while({line= f.getLine(266); line.notNil}, {
-			
+
 			//--check start character
 			if(line[0]!=$:, {
 				(this.class.name++": read error - no colon at beginning of line").warn;
 			}, {
-				
+
 				//--read line
-				byteCount= ("0x"++line[1..2]).interpret;
-				address= ("0x"++line[3..6]).interpret;
-				recordType= ("0x"++line[7..8]).interpret;
+				byteCount= this.prHexStrToInt(line[1..2]);
+				address= this.prHexStrToInt(line[3..6]);
+				recordType= this.prHexStrToInt(line[7..8]);
 				dataBytes= [];
-				checksum= ("0x"++line[byteCount*2+9]++line[byteCount*2+10]).interpret;
-				
+				checksum= this.prHexStrToInt(line[byteCount*2+9]++line[byteCount*2+10]);
+
 				//--messages
 				switch(recordType,
 					0, {	//data
-						dataBytes= {|i| ("0x"++line[i*2+9]++line[i*2+10]).interpret}!byteCount;
+						dataBytes= {|i| this.prHexStrToInt(line[i*2+9]++line[i*2+10])}!byteCount;
 					},
 					1, {	//end of file
 						eof= true;
 					},
 					2, {	//extended segment address
-						segment= ("0x"++line[9..10]).interpret;//not thoroughly tested
+						segment= this.prHexStrToInt(line[9..10]);  //not thoroughly tested
 					},
 					3, {	//start segment address
 						(this.class.name++": Start Segment Address Record not implemented").warn;
 					},
 					4, {	//extended linear address
-						extended= ("0x"++line[9..10]).interpret;//not thoroughly tested
+						extended= this.prHexStrToInt(line[9..10]);  //not thoroughly tested
 					},
 					5, {	//start linear address
 						(this.class.name++": Start Linear Address Record not implemented").warn;
 					}
 				);
-				
+
 				//--checksum
 				if(256-(byteCount+(address%255)+recordType+dataBytes.sum.bitAnd(255))!=checksum, {
 					(this.class.name++": checksum error").warn;
 				});
-				
+
 				//--add to resulting array
 				if(eof.not, {
 					array= array.add([extended*65536+(segment*16+address), dataBytes]);
@@ -90,5 +90,8 @@ RedIntelHex {
 		if(eof.not, {
 			(this.class.name++": no end-of-file found").warn;
 		});
+	}
+	prHexStrToInt {|str|
+		^str.sum{|chr, i| chr.digit*(16**(str.size-1-i))}
 	}
 }

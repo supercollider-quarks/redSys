@@ -50,6 +50,7 @@ a.free;
 b.close;
 c.close;
 
+//embed in a window
 (
 var efx= [RedEfxRing.new, RedEfxDist.new, RedEfxTank.new, RedEfxGuit.new];
 var win= Window("test", Rect(100, 200, 300, 400));
@@ -62,6 +63,7 @@ efx.do{|x|
 CmdPeriod.doOnce({win.close});
 )
 
+//two guis for one effect, automatically linked
 (
 var efx= RedEfxTank.new;
 var win= Window("hgf", Rect(100, 200, 500, 500));
