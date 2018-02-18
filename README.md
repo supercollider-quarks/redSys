@@ -12,6 +12,7 @@ see redSysOverview in help
 
 ## changelog:
 
+* 180218 - replaced a few .interpret in hex-string to integer conversion
 * 180116 - new readme. dropped Conductor quark dependency. cleanup helpfiles. fixed RedTapeRecorder. minor bugfix to RedTest. major rewrite of redMatrixMixer, redMix, redMixer, redGUICV, redModule, redEffectsRack
 * 151124 - RedTapTempoGUI - alpha
 * 131228 - added default values for RedTime-new and some more examples
