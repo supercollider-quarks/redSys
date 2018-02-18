@@ -2,10 +2,10 @@
 
 RedHuffman {
 	classvar <>tree, <>dict, <>pad;
-	
+
 	*compress {|arr|
 		var out, n0, n1;
-		
+
 		//--build a forest of small trees
 		tree= [];
 		arr.do{|val|
@@ -16,21 +16,21 @@ RedHuffman {
 				n.value= n.value+1;				//increase counter
 			});
 		};
-		
+
 		//--collect greedy as a single big tree
 		while({tree.size>2}, {
 			n0= this.prTakeMinimum;
 			n1= this.prTakeMinimum;
 			tree= tree.add(([n0, n1] -> (n0.value+n1.value)));
 		});
-		
+
 		//--remove counters from tree
 		tree= this.prRebuildTree(tree);
-		
+
 		//--build dictionary
 		dict= ();
 		this.prBuildDict(tree, "");
-		
+
 		//--create binary string
 		out= "";
 		arr.do{|val|
@@ -56,7 +56,7 @@ RedHuffman {
 				x= x++0;
 				pad= pad+1;
 			});
-			("2r"++x).interpret;
+			x.sum{|bit, i| 2**(x.size-1-i)*bit.digit};
 		};
 	}
 	*bytesToBinaryString {|arr|
@@ -65,8 +65,8 @@ RedHuffman {
 		}.join;
 		^str.copyRange(0, str.size-1-pad);
 	}
-	
-	
+
+
 	//--private
 	*prTakeMinimum {
 		var ii, nn, min= 2147483647;
