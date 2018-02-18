@@ -2,7 +2,7 @@
 
 RedLZSS {
 	classvar <>window= 4096, <>length= 32, <>pad;
-	
+
 	*compress {|input|
 		var out= "", i= 0, len, off, sub, j;
 		var bitsWin= (window-1).numBits;
@@ -57,20 +57,24 @@ RedLZSS {
 		while({i<input.size}, {
 			if(input[i].digit==0, {
 				i= i+1;
-				out= out++("2r"++input.copyRange(i, i+7)).interpret;
+				//out= out++("2r"++input.copyRange(i, i+7)).interpret;
+				out= out++this.prBitStrToInt(input.copyRange(i, i+7));
 				i= i+8;
 			}, {
 				i= i+1;
-				len= ("2r"++input.copyRange(i, i+bitsLen-1)).interpret+2;
+				//len= ("2r"++input.copyRange(i, i+bitsLen-1)).interpret+2;
+				len= this.prBitStrToInt(input.copyRange(i, i+bitsLen-1))+2;
 				i= i+bitsLen;
-				off= ("2r"++input.copyRange(i, i+bitsWin-1)).interpret;
+				//off= ("2r"++input.copyRange(i, i+bitsWin-1)).interpret;
+				off= this.prBitStrToInt(input.copyRange(i, i+bitsWin-1));
 				i= i+bitsWin;
 				while({len>0}, {
 					out= out++out[out.size-off];
 					len= len-1;
 				});
 				if(i<input.size, {
-					out= out++("2r"++input.copyRange(i, i+7)).interpret;
+					//out= out++("2r"++input.copyRange(i, i+7)).interpret;
+					out= out++this.prBitStrToInt(input.copyRange(i, i+7));
 					i= i+8;
 				});
 			});
@@ -84,7 +88,7 @@ RedLZSS {
 				x= x++0;
 				pad= pad+1;
 			});
-			("2r"++x).interpret;
+			this.prBitStrToInt(x);
 		};
 	}
 	*bytesToBinaryString {|arr|
@@ -92,5 +96,10 @@ RedLZSS {
 			x.asBinaryString(8);
 		}.join;
 		^str.copyRange(0, str.size-1-pad);
+	}
+
+	//--private
+	*prBitStrToInt {|str|
+		^str.sum{|bit, i| 2**(str.size-1-i)*bit.digit}.asInteger;
 	}
 }

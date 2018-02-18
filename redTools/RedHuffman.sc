@@ -56,7 +56,7 @@ RedHuffman {
 				x= x++0;
 				pad= pad+1;
 			});
-			x.sum{|bit, i| 2**(x.size-1-i)*bit.digit};
+			x.sum{|bit, i| 2**(x.size-1-i)*bit.digit}.asInteger;
 		};
 	}
 	*bytesToBinaryString {|arr|

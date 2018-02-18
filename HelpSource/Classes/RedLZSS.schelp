@@ -14,6 +14,8 @@ Only works with 8bit link::Classes/Integer:: (0-255) values.
 
 CLASSMETHODS::
 
+PRIVATE:: prBitStrToInt
+
 METHOD:: compress
 Expects an array of 8bit integers. Returns a string of binary numbers.
 
