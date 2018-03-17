@@ -1,14 +1,14 @@
 //redFrik
 
 RedEfxRing : RedEffectModule {
-	*def {
+	*def {|lag= 0|
 		^SynthDef(\redEfxRing, {|out= 0, mix= -1, freq= 440, mul= 1, rate= 6, det= 0|
 			var dry, wet, lfo;
 			dry= In.ar(out, 2);
 			lfo= SinOsc.ar(rate, 0, mul);
 			wet= dry*SinOsc.ar(freq*[1, 2.pow(det)]+lfo, 0, 1);
 			ReplaceOut.ar(out, XFade2.ar(dry, wet, mix));
-		}, metadata: (
+		}, [0, lag, lag, lag, lag, lag], metadata: (
 			specs: (
 				\out: \audiobus.asSpec,
 				\mix: ControlSpec(-1, 1, 'lin', 0, -1),

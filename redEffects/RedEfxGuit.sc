@@ -1,7 +1,7 @@
 //redFrik - adapted from sc-users post 'Saturation' by Batuhan Bozkurt, sc-users 090701
 
 RedEfxGuit : RedEffectModule {
-	*def {
+	*def {|lag= 0|
 		^SynthDef(\redEfxGuit, {|out= 0, mix= -1, amount= 0.5, fc= 3500, center= 120, rq= 0.707|
 			var dry, wet, k;
 			dry= In.ar(out, 2);
@@ -9,7 +9,7 @@ RedEfxGuit : RedEffectModule {
 			wet= ((1+k)*dry)/(1+(k*dry.abs));
 			wet= MidEQ.ar((LPF.ar(wet, fc*#[1, 1.1])*0.5), center, rq, 8);
 			ReplaceOut.ar(out, XFade2.ar(dry, wet, mix));
-		}, metadata: (
+		}, [0, lag, lag, lag, lag, lag], metadata: (
 			specs: (
 				\out: \audiobus.asSpec,
 				\mix: ControlSpec(-1, 1, 'lin', 0, -1),

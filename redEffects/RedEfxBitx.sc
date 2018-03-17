@@ -1,14 +1,14 @@
 //redFrik - bitcrusher
 
 RedEfxBitx : RedEffectModule {
-	*def {
+	*def {|lag= 0|
 		^SynthDef(\redEfxBitx, {|out= 0, mix= -1, rate= 0.5, bits= 4|
 			var dry, wet, crux;
 			dry= In.ar(out, 2);
 			crux= (dry*bits+bits).floor-bits/bits;
 			wet= Latch.ar(crux, Impulse.ar(SampleRate.ir*0.5*rate));
 			ReplaceOut.ar(out, XFade2.ar(dry, wet, mix));
-		}, metadata: (
+		}, [0, lag, lag, lag], metadata: (
 			specs: (
 				\out: \audiobus.asSpec,
 				\mix: ControlSpec(-1, 1, 'lin', 0, -1),

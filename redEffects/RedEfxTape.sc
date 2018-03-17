@@ -1,7 +1,7 @@
 //redFrik - adapted from jmc's tape example in LocalIn helpfile
 
 RedEfxTape : RedEffectModule {
-	*def {
+	*def {|lag= 0|
 		^SynthDef(\redEfxTape, {|out= 0, mix= -1, fb= 1, ff= 1.25, thresh= 0.02, rate= 0.25|
 			var dry, wet, in2;
 			dry= In.ar(out, 2);
@@ -14,7 +14,7 @@ RedEfxTape : RedEffectModule {
 			wet= ((wet+dry)*ff).softclip;
 			LocalOut.ar(wet);
 			ReplaceOut.ar(out, XFade2.ar(dry, wet*0.1, mix));
-		}, metadata: (
+		}, [0, lag, lag, lag, lag, lag], metadata: (
 			specs: (
 				\out: \audiobus.asSpec,
 				\mix: ControlSpec(-1, 1, 'lin', 0, -1),

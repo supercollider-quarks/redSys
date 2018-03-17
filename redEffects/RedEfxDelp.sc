@@ -1,7 +1,7 @@
 //redFrik - adapted from sc-users post 'FM Swear Box' by Paul Jones, sc-users 090919
 
 RedEfxDelp : RedEffectModule {
-	*def {
+	*def {|lag= 0|
 		^SynthDef(\redEfxDelp, {|out= 0, mix= -1, fb= 0.98, dly= 0.3, ps= 1.667, fc= 9999, rq= 1, fc2= 3000, rq2= 2|
 			var dry, wet, loc, cmp, pch, wet2;
 			dry= In.ar(out, 2);
@@ -14,7 +14,7 @@ RedEfxDelp : RedEffectModule {
 			LocalOut.ar(wet2*fb);
 			wet2= BLowPass4.ar(wet2, fc, rq);
 			ReplaceOut.ar(out, XFade2.ar(dry, wet2, mix));
-		}, metadata: (
+		}, [0, lag, lag, lag, lag, lag, lag, lag, lag], metadata: (
 			specs: (
 				\out: \audiobus.asSpec,
 				\mix: ControlSpec(-1, 1, 'lin', 0, -1),

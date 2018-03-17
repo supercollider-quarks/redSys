@@ -1,8 +1,5 @@
 //redFrik
 
-//--todo:
-//global lag?
-
 //--related:
 //RedEffectsRackGUI RedEffectModule RedAbstractMix
 
@@ -10,8 +7,8 @@ RedEffectsRack {
 	classvar <>defaultClasses;
 	var <group, <cvs, <specs, <isReady= false, groupPassedIn,
 	<efxs, controllers;
-	*new {|efxClasses, out= 0, group|
-		^super.new.initRedEffectsRack(efxClasses, out, group);
+	*new {|efxClasses, out= 0, group, lag= 0|
+		^super.new.initRedEffectsRack(efxClasses, out, group, lag);
 	}
 	*initClass {
 		defaultClasses= [	//just some favourites
@@ -23,7 +20,7 @@ RedEffectsRack {
 			RedEfxComp
 		];
 	}
-	initRedEffectsRack {|efxClasses, argOut, argGroup|
+	initRedEffectsRack {|efxClasses, argOut, argGroup, lag|
 		var server;
 		if(efxClasses.isNil or:{efxClasses.isEmpty}, {
 			(this.class.name++": efxClasses empty so using the default classes").inform;
@@ -46,7 +43,7 @@ RedEffectsRack {
 			});
 
 			//--create efxs
-			efxs= efxClasses.collect{|x| x.new(argOut, group)};
+			efxs= efxClasses.collect{|x| x.new(argOut, group, \addToTail, lag)};
 
 			//--one bus that controlls them all
 			cvs= ();

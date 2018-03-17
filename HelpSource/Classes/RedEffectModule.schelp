@@ -23,6 +23,9 @@ ARGUMENT:: addAction
 
 A link::Classes/Symbol::.
 
+ARGUMENT:: lag
+a non-modulatable lag time for all parameters.
+
 INSTANCEMETHODS::
 
 PRIVATE:: initRedEffectModule, prAddControllers
@@ -65,13 +68,13 @@ g.close;
 //--class template
 
 RedEfxTemp : RedEffectModule {
-	*def {
+	*def {|lag= 0|
 		^SynthDef(\redEfxTemp, {|out= 0, mix= -1, amount= 1|
 			var dry, wet;
 			dry= In.ar(out, 2);
 			wet= dry*LFTri.ar(1, 0, amount, 1);
 			ReplaceOut.ar(out, XFade2.ar(dry, wet, mix));
-		}, metadata: (
+		}, [0, lag, lag], metadata: (
 			specs: (
 				\out: \audiobus.asSpec,	//this should always be present
 				\mix: ControlSpec(-1, 1, 'lin', 0, -1),	//and this too

@@ -2,7 +2,7 @@
 //maybe a slope limiter intead of lag?
 
 RedEfxAuto : RedEffectModule {
-	*def {
+	*def {|lag= 0|
 		^SynthDef(\redEfxAuto, {|out= 0, mix= -1, freq= 400, lag= 0.01|
 			var dry, wet, phasor1, phasor2, read1, read2, window1, window2, pitch, ratio;
 			var windowDur= 0.1;
@@ -17,7 +17,7 @@ RedEfxAuto : RedEffectModule {
 			window2= sin(phasor2*pi);
 			wet= (read1*window1)+(read2*window2);
 			ReplaceOut.ar(out, XFade2.ar(dry, wet, mix));
-		}, metadata: (
+		}, [0, lag, lag, lag], metadata: (
 			specs: (
 				\out: \audiobus.asSpec,
 				\mix: ControlSpec(-1, 1, 'lin', 0, -1),

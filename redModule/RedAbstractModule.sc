@@ -7,13 +7,14 @@ RedAbstractModule {	//abstract class
 	classvar <all;
 	var <group, addAction, <cvs, <specs;
 	var condition, controllers;
+	var thisdef;
 	*initClass {
 		all= List.new;
 	}
-	*new {|group, addAction|
-		^super.new.initRedAbstractModule(group, addAction);
+	*new {|group, addAction, lag= 0|
+		^super.new.initRedAbstractModule(group, addAction, lag);
 	}
-	initRedAbstractModule {|argGroup, argAddAction|
+	initRedAbstractModule {|argGroup, argAddAction, lag|
 		var server;
 		condition= Condition();
 		if(argGroup.isNil, {
@@ -26,10 +27,11 @@ RedAbstractModule {	//abstract class
 		cvs= ();
 		specs= ();
 		controllers= List.new;
-		this.def.metadata[\order].do{|assoc|
+		thisdef= this.def(lag);
+		thisdef.metadata[\order].do{|assoc|
 			var k= assoc.key;
 			var v= assoc.value;
-			var spec= this.def.metadata[\specs][k];
+			var spec= thisdef.metadata[\specs][k];
 			if(k==\out, {v= \out});	//special case
 			cvs.put(v, Ref(spec.default));
 			specs.put(k, spec);
@@ -37,7 +39,7 @@ RedAbstractModule {	//abstract class
 		this.initMethods;
 		forkIfNeeded{
 			server.bootSync;
-			this.def.add;
+			thisdef.add;
 			server.sync;
 			condition.test= true;
 			condition.signal;
@@ -59,14 +61,14 @@ RedAbstractModule {	//abstract class
 		if(name==\out, {
 			^\out;
 		}, {
-			^this.def.metadata[\order].detect{|x| x.value==name}.key;
+			^thisdef.metadata[\order].detect{|x| x.value==name}.key;
 		});
 	}
 	free {
 		controllers.do{|x| x.remove};
 		all.remove(this);
 	}
-	def {^this.class.def}
+	def {|lag| ^this.class.def(lag)}
 
 	//--for subclasses
 	*def {^this.subclassResponsibility(thisMethod)}

@@ -1,14 +1,14 @@
 //redFrik - bitcrusher adapted from adc's bit reduction example found in examples folder
 
 RedEfxBitc : RedEffectModule {
-	*def {
+	*def {|lag= 0|
 		^SynthDef(\redEfxBitc, {|out= 0, mix= -1, rate= 0.5, bits= 4|
 			var dry, wet;
 			dry= In.ar(out, 2);
 			wet= Latch.ar(dry, Impulse.ar(SampleRate.ir*0.5*rate));
 			wet= wet.round(0.5**bits);
 			ReplaceOut.ar(out, XFade2.ar(dry, wet, mix));
-		}, metadata: (
+		}, [0, lag, lag, lag], metadata: (
 			specs: (
 				\out: \audiobus.asSpec,
 				\mix: ControlSpec(-1, 1, 'lin', 0, -1),

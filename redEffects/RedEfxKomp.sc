@@ -1,7 +1,7 @@
 //redFrik
 
 RedEfxKomp : RedEffectModule {
-	*def {
+	*def {|lag= 0|
 		^SynthDef(\redEfxKomp, {|out= 0, mix= -1, preGain= 1, postGain= 1, thresh= 0.1, ratio= 5, atk= 0.05, rel= 0.05|
 			var dry, wet, ana, flg, cmp;
 			dry= In.ar(out, 2)*preGain;
@@ -10,7 +10,7 @@ RedEfxKomp : RedEffectModule {
 			cmp= (((flg*ana)-(flg*thresh))*ratio).max(0);
 			wet= dry*(1-cmp);
 			ReplaceOut.ar(out, XFade2.ar(dry, wet*postGain, mix));
-		}, metadata: (
+		}, [0, lag, lag, lag, lag, lag, lag, lag], metadata: (
 			specs: (
 				\out: \audiobus.asSpec,
 				\mix: ControlSpec(-1, 1, 'lin', 0, -1),

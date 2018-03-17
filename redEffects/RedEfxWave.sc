@@ -1,13 +1,13 @@
 //redFrik - adapted from example by Bram de Jong, musicdsp.org
 
 RedEfxWave : RedEffectModule {
-	*def {
+	*def {|lag= 0|
 		^SynthDef(\redEfxWave, {|out= 0, mix= -1, amount= 25|
 			var dry, wet;
 			dry= In.ar(out, 2);
 			wet= dry*(dry.abs+amount)/(dry*dry+(amount-1)*dry.abs+1);
 			ReplaceOut.ar(out, XFade2.ar(dry, wet, mix));
-		}, metadata: (
+		}, [0, lag, lag], metadata: (
 			specs: (
 				\out: \audiobus.asSpec,
 				\mix: ControlSpec(-1, 1, 'lin', 0, -1),

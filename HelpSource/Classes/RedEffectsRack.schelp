@@ -21,6 +21,9 @@ Output bus.
 ARGUMENT:: group
 code::nil:: creates a group after the code::defaultGroup::.
 
+ARGUMENT:: lag
+a non-modulatable lag time for all parameters in all modules.
+
 INSTANCEMETHODS::
 
 PRIVATE:: initRedEffectsRack

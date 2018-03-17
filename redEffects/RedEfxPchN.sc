@@ -1,7 +1,7 @@
 //redFrik - but n is hardcoded
 
 RedEfxPchN : RedEffectModule {
-	*def {
+	*def {|lag= 0|
 		^SynthDef(\redEfxPchN, {|out= 0, mix= -1, ratio= 4|
 			var dry, wet, phasors, reads, windows;
 			var windowDur= 0.1;
@@ -12,7 +12,7 @@ RedEfxPchN : RedEffectModule {
 			windows= sin(phasors*pi);
 			wet= [Mix((reads*windows)[0]), Mix((reads*windows)[1])];
 			ReplaceOut.ar(out, XFade2.ar(dry, wet, mix));
-		}, metadata: (
+		}, [0, lag, lag], metadata: (
 			specs: (
 				\out: \audiobus.asSpec,
 				\mix: ControlSpec(-1, 1, 'lin', 0, -1),

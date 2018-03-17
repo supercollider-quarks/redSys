@@ -6,11 +6,11 @@
 
 RedEffectModule : RedAbstractModule {	//abstract class
 	var <synth;
-	*new {|out= 0, group, addAction= \addToTail|
-		^super.new(group, addAction).initRedEffectModule(out);
+	*new {|out= 0, group, addAction= \addToTail, lag= 0|
+		^super.new(group, addAction, lag).initRedEffectModule(out);
 	}
 	initModule {|group|
-		this.def.add;
+		thisdef.add;
 		group.server.sync;
 		all.add(this);
 		super.initMethods;
@@ -25,7 +25,7 @@ RedEffectModule : RedAbstractModule {	//abstract class
 				args.add(this.cvsToParam(k));
 				args.add(v.value);
 			};
-			synth= Synth(this.def.name, args, group, addAction);
+			synth= Synth(thisdef.name, args, group, addAction);
 			this.prAddControllers;
 		};
 	}

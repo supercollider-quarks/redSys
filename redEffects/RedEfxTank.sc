@@ -1,7 +1,7 @@
 //redFrik - adapted from jmc's tank example in LocalIn helpfile
 
 RedEfxTank : RedEffectModule {
-	*def {
+	*def {|lag= 0|
 		^SynthDef(\redEfxTank, {|out= 0, mix= -1, fb= 0.98, dec= 1, damp= 1|
 			var dry, wet, in2;
 			dry= In.ar(out, 2);
@@ -18,7 +18,7 @@ RedEfxTank : RedEffectModule {
 			wet= wet+in2;
 			LocalOut.ar(wet);
 			ReplaceOut.ar(out, XFade2.ar(dry, wet, mix));
-		}, metadata: (
+		}, [0, lag, lag, lag, lag], metadata: (
 			specs: (
 				\out: \audiobus.asSpec,
 				\mix: ControlSpec(-1, 1, 'lin', 0, -1),

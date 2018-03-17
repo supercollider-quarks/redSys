@@ -1,20 +1,20 @@
 //redFrik - should be either full on or off (mix -1 or mix 1)
 
 RedEfxZzzz : RedEffectModule {
-	*def {
+	*def {|lag= 0|
 		^SynthDef(\redEfxZzzz, {|out= 0, mix= -1, vol= 0|
 			var dry, wet;
 			dry= In.ar(out, 2);
 			wet= dry*vol.dbamp;
 			wet= Limiter.ar(
 				LeakDC.ar(
-					
+
 					//--this from StageLimiter by Batuhan Bozkurt
 					Select.ar(CheckBadValues.ar(wet, 0, 2), [wet, DC.ar(0), DC.ar(0), wet])
 				)
 			);
 			ReplaceOut.ar(out, XFade2.ar(dry, wet, mix));
-		}, metadata: (
+		}, [0, lag, lag], metadata: (
 			specs: (
 				\out: \audiobus.asSpec,
 				\mix: ControlSpec(-1, 1, 'lin', 1, -1),

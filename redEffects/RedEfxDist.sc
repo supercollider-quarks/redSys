@@ -1,13 +1,13 @@
 //redFrik - adapted from example in Tour_of_UGens helpfile
 
 RedEfxDist : RedEffectModule {
-	*def {
+	*def {|lag= 0|
 		^SynthDef(\redEfxDist, {|out= 0, mix= -1, depth= 0.8, freq= 0.3|
 			var dry, wet;
 			dry= In.ar(out, 2);
 			wet= SinOsc.ar(freq, dry*(1+(depth*(8pi-1))))*0.25;
 			ReplaceOut.ar(out, XFade2.ar(dry, wet, mix));
-		}, metadata: (
+		}, [0, lag, lag, lag], metadata: (
 			specs: (
 				\out: \audiobus.asSpec,
 				\mix: ControlSpec(-1, 1, 'lin', 0, -1),

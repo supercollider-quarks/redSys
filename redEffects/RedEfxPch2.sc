@@ -1,7 +1,7 @@
 //redFrik - only two overlapping windows
 
 RedEfxPch2 : RedEffectModule {
-	*def {
+	*def {|lag= 0|
 		^SynthDef(\redEfxPch2, {|out= 0, mix= -1, ratio= 4|
 			var dry, wet, phasor1, phasor2, read1, read2, window1, window2;
 			var windowDur= 0.1;
@@ -14,7 +14,7 @@ RedEfxPch2 : RedEffectModule {
 			window2= sin(phasor2*pi);
 			wet= (read1*window1)+(read2*window2);
 			ReplaceOut.ar(out, XFade2.ar(dry, wet, mix));
-		}, metadata: (
+		}, [0, lag, lag], metadata: (
 			specs: (
 				\out: \audiobus.asSpec,
 				\mix: ControlSpec(-1, 1, 'lin', 0, -1),

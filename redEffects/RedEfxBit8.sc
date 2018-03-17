@@ -1,7 +1,7 @@
 //redFrik - bitcrusher with ringmodulation
 
 RedEfxBit8 : RedEffectModule {
-	*def {
+	*def {|lag= 0|
 		^SynthDef(\redEfxBit8, {|out= 0, mix= -1, rate= 0.5, bits= 4, freq= 150|
 			var dry, wet, ring, crux;
 			dry= In.ar(out, 2);
@@ -9,7 +9,7 @@ RedEfxBit8 : RedEffectModule {
 			crux= (ring*bits+bits).floor-bits/bits;
 			wet= Latch.ar(crux, Impulse.ar(SampleRate.ir*0.5*rate));
 			ReplaceOut.ar(out, XFade2.ar(dry, wet, mix));
-		}, metadata: (
+		}, [0, lag, lag, lag, lag], metadata: (
 			specs: (
 				\out: \audiobus.asSpec,
 				\mix: ControlSpec(-1, 1, 'lin', 0, -1),

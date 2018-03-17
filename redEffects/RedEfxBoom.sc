@@ -1,13 +1,13 @@
 //redFrik
 
 RedEfxBoom : RedEffectModule {
-	*def {
+	*def {|lag= 0|
 		^SynthDef(\redEfxBoom, {|out= 0, mix= -1, gain= 1|
 			var dry, wet;
 			dry= In.ar(out, 2);
 			wet= DelayN.ar(dry, 0.283, 0.283, gain);
 			ReplaceOut.ar(out, XFade2.ar(dry, wet, mix));
-		}, metadata: (
+		}, [0, lag, lag], metadata: (
 			specs: (
 				\out: \audiobus.asSpec,
 				\mix: ControlSpec(-1, 1, 'lin', 0, -1),

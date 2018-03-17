@@ -1,7 +1,7 @@
 //redFrik - buffer duration hardcoded.  also work as pitch shifter if rate is positive
 
 RedEfxRvrs : RedEffectModule {
-	*def {
+	*def {|lag= 0|
 		^SynthDef(\redEfxRvrs, {|out= 0, mix= -1, rate= -1|
 			var dry, wet;
 			var bufferDur= 8;			//in seconds
@@ -10,7 +10,7 @@ RedEfxRvrs : RedEffectModule {
 			BufWr.ar(dry, buffer, Phasor.ar(1, 1, 0, BufFrames.ir(buffer)));
 			wet= PlayBuf.ar(2, buffer, rate, loop:1);
 			ReplaceOut.ar(out, XFade2.ar(dry, wet, mix));
-		}, metadata: (
+		}, [0, lag, lag], metadata: (
 			specs: (
 				\out: \audiobus.asSpec,
 				\mix: ControlSpec(-1, 1, 'lin', 0, -1),

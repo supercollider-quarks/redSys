@@ -2,13 +2,13 @@
 //todo: add more gverb parameters
 
 RedEfxRoom : RedEffectModule {
-	*def {
+	*def {|lag= 0|
 		^SynthDef(\redEfxRoom, {|out= 0, mix= -1, room= 50, time= 1, damp= 0.5|
 			var dry, wet;
 			dry= In.ar(out, 2);
 			wet= GVerb.ar(dry, room, time, damp);
 			ReplaceOut.ar(out, XFade2.ar(dry, wet, mix));
-		}, metadata: (
+		}, [0, lag, lag, lag, lag], metadata: (
 			specs: (
 				\out: \audiobus.asSpec,
 				\mix: ControlSpec(-1, 1, 'lin', 0, -1),
