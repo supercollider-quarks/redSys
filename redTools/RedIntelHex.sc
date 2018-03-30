@@ -33,7 +33,7 @@ RedIntelHex {
 	//--private
 	prRead {|path|
 		var f= File(path, "r");
-		var byteCount, address, recordType, dataBytes, checksum;
+		var byteCount, address, recordType, dataBytes, checksum, sum;
 		var segment= 0, extended= 0;	//not thoroughly tested
 		var eof= false;
 		var line;
@@ -54,9 +54,9 @@ RedIntelHex {
 				checksum= this.prHexStrToInt(line[byteCount*2+9]++line[byteCount*2+10]);
 
 				//--messages
+				dataBytes= {|i| this.prHexStrToInt(line[i*2+9]++line[i*2+10])}!byteCount;
 				switch(recordType,
 					0, {	//data
-						dataBytes= {|i| this.prHexStrToInt(line[i*2+9]++line[i*2+10])}!byteCount;
 					},
 					1, {	//end of file
 						eof= true;
@@ -76,7 +76,8 @@ RedIntelHex {
 				);
 
 				//--checksum
-				if(256-(byteCount+(address%255)+recordType+dataBytes.sum.bitAnd(255))!=checksum, {
+				sum= byteCount+address.rightShift(8)+address.bitAnd(255)+recordType+dataBytes.sum;
+				if(256-sum.bitAnd(255)!=checksum, {
 					(this.class.name++": checksum error").warn;
 				});
 
